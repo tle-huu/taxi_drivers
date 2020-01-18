@@ -15,7 +15,7 @@ class CarLeader(nn.Module):
         self.cars_number = cars_number
 
         self.convs1 = nn.Sequential(nn.Conv2d(2, hidden_channels, kernel_size = 3, padding = 1),
-                                    nn.MaxPool2d(hidden_channels),
+                                    nn.BatchNorm2d(hidden_channels),
                                     nn.ReLU(True))
 
         self.flatten = torch.nn.Flatten()
