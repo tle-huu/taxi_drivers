@@ -1,4 +1,5 @@
 import numpy as np
+import pygame
 
 grid = np.zeros([4, 5])
 
@@ -34,8 +35,20 @@ def print_grid(grid):
 
 
 def main():
-    pass
-    
+
+    for y in range(height):
+        for x in range(width):
+            rect = pygame.Rect(x*block_size, y*block_size, block_size, block_size)
+            pygame.draw.rect(window, color, rect)
+    # head
+    x, y = snake[0]
+    rect = pygame.Rect(x*block_size, y*block_size, block_size, block_size)
+    pygame.draw.rect(window, head_color, rect)
+
+    # tail
+    for x, y in snake[1:]:
+        rect = pygame.Rect(x*block_size, y*block_size, block_size, block_size)
+        pygame.draw.rect(window, tail_color, rect)    
 
 
 
