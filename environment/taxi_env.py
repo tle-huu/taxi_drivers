@@ -42,11 +42,12 @@ class TaxiEnv:
 
         self.map = np.zeros([self.size, self.size])
         self.car_position_ = [0, 0]
-        self.destination_position_ = [int(self.size / 2), int(self.size / 2)]
+        # self.destination_position_ = [int(self.size / 2), int(self.size / 2)]
 
 
         # self.car_position_ = [random.randint(0, self.size - 1), random.randint(0, self.size - 1)]
-        # self.destination_position_ = [random.randint(0, self.size - 1), random.randint(0, self.size - 1)]
+        self.destination_position_ = [int(random.randint(0, self.size - 1)), int(random.randint(0, self.size - 1))]
+        # self.destination_position_ = [2, 2]
 
         # while self.car_position_ == self.destination_position_:
         #     self.destination_position_ = [random.randint(0, self.size - 1), random.randint(0, self.size - 1)]
@@ -82,6 +83,50 @@ class TaxiEnv:
 
         return self.car_position_[1] * 8 + self.car_position_[0]
 
+    def encode(self, taxi_row, taxi_col, destination):
+
+        res = taxi_col
+        res *= self.size
+
+        res += taxi_row
+        res *= self.size
+
+        # Destination col
+        res += destination[0]
+        res *= self.size
+
+        # Destination row
+        res += destination[1]
+        return res
+
+    def decode(self, encoded_state):
+
+        out = []
+
+        # destination row
+        out.append(encoded_state % self.size)
+        encoded_state = encoded_state // self.size
+
+        # destination col
+        out.append(encoded_state % self.size)
+        encoded_state = encoded_state // self.size
+
+        # Row (y)
+        encoded_state = encoded_state // self.size
+        out.append(encoded_state % self.size)
+
+        # Column (x)
+        encoded_state = encoded_state // self.size
+        out.append(encoded_state % self.size)
+
+        assert 0 <= encoded_state < self.size
+
+        out.reverse()
+
+        # out is [col, row, dest_col, dest_row]
+        return out
+
+
     def step(self, action):
 
         if action not in self.ACTIONS:
@@ -100,7 +145,7 @@ class TaxiEnv:
 
         self.update_map(current)
 
-        done = self.car_position_ == self.destination_position_
+        done = int(self.car_position_ == self.destination_position_)
 
         if done:
             reward = self.reward['reached']
@@ -111,7 +156,7 @@ class TaxiEnv:
 
 
 
-        return self.lol(), reward, done, None
+        return self.encode(self.car_position_[0], self.car_position_[1], (self.destination_position_[0], self.destination_position_[0])), reward, done, None
 
     def set_reward(new_reward):
         self.reward = new_reward

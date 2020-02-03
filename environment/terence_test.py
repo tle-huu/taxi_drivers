@@ -12,11 +12,11 @@ from IPython.display import clear_output
 env = TaxiEnv(8)
 
 action_space_size = 4
-state_space_size = 64
+state_space_size = 8 * 8 * 8 * 8
 
 q_table = np.zeros([state_space_size, action_space_size])
 
-NUM_EPISODES = 1000
+NUM_EPISODES = 10000
 MAX_STEPS_PER_EPISODE = 200
 
 
@@ -72,11 +72,12 @@ for episode in range(NUM_EPISODES):
         # else:
         #     reward = -1
 
-        if exploration_rate_threshold > exploration_rate:
-            action_2 = np.argmax(q_table[new_state,:])
-        else:
-            action_2 = random.randint(0, 3)
-        q_table[state, action] = (1 - LEARNING_RATE) * q_table[state, action] + LEARNING_RATE * (reward + DISCOUNT_RATE * q_table[new_state, action_2])
+        # if exploration_rate_threshold > exploration_rate:
+        #     action_2 = np.argmax(q_table[new_state,:])
+        # else:
+        #     action_2 = random.randint(0, 3)
+
+        q_table[state, action] = (1 - LEARNING_RATE) * q_table[state, action] + LEARNING_RATE * (reward + DISCOUNT_RATE * np.max(q_table[new_state, :]))
 
         state = new_state
 
@@ -106,21 +107,23 @@ for i in range(lol):
     env.reset()
     current_reward = 0
     done = False
-    while not done:
-        env.render()
+    i = 0
+    while not done and i < 20:
+        # env.render()
         action = np.argmax(q_table[state, :])
         state, reward, done, info = env.step(action)
+        print(action, reward)
         current_reward += reward
-        time.sleep(0.300)
-    env.render()
-    env.render()
+        # time.sleep(0.300)
+        i+=1
+    # env.render()
+    # env.render()
     if reward == 50:
         print(" ############## GOAL ################3 ")
         wins += 1
     else:
         print(" FELL ")
-        clear_output(wait=True)
-    time.sleep(2)
+    # time.sleep(2)
 
     r.append(current_reward)
 
