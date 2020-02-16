@@ -31,7 +31,6 @@ class TaxiEnv:
         self.map = np.zeros([map_size, map_size])
 
         self.action_space = ActionSpace(5 ** self.number_of_cars)
-
         self.state_space_size = self.size ** (2 * (number_of_cars + 1))
 
         self.car_position_ = {'x': 0, 'y': 0}
@@ -94,7 +93,7 @@ class TaxiEnv:
                     print("G", end='')
                 elif self.map[y,x] == -1:
                     print("#", end='')
-                elif self.map[y,x] == 3:
+                elif self.map[y,x] == 50000:
                     print("S", end='')
                 else:
                     print(" ", end='')
@@ -105,6 +104,8 @@ class TaxiEnv:
 
         # self.console_render()
         self.renderer.render()
+
+
 
     def encode_space(self, cars_positions, destination):
 
@@ -130,28 +131,27 @@ class TaxiEnv:
 
         out = []
 
-        # destination row
-        out.append(encoded_state % self.size)
+        destination_x = encoded_state % self.size
         encoded_state = encoded_state // self.size
 
-        # destination col
-        out.append(encoded_state % self.size)
+        destination_y = encoded_state % self.size
         encoded_state = encoded_state // self.size
 
-        # Row (y)
-        encoded_state = encoded_state // self.size
-        out.append(encoded_state % self.size)
+        map_out = self.map.copy()
 
-        # Column (x)
-        encoded_state = encoded_state // self.size
-        out.append(encoded_state % self.size)
+        map_out[destination_y][destination_x] = 10000
 
-        assert 0 <= encoded_state < self.size
+        for i in range(self.number_of_cars):
 
-        out.reverse()
+            x = encoded_state % self.size
+            encoded_state = encoded_state // self.size
 
-        # out is [col, row, dest_col, dest_row]
-        return out
+            y = encoded_state % self.size
+            encoded_state = encoded_state // self.size
+
+            map_out[y][x] += 1
+
+        return map_out
 
     def encode_action(self, actions_array):
 
@@ -176,12 +176,10 @@ class TaxiEnv:
 
         return action_array
 
-
-
-
     def step(self, action):
 
         action_array = self.decode_action(action)
+        action_array.reverse()
 
         reward = 0
 
@@ -212,18 +210,18 @@ class TaxiEnv:
                 reward += 200
                 done += 1
             elif current == self.destination_position_:
-                reward -= 100
+                reward -= 500
             elif car_position == current:
                 reward -= 50
             elif mur > 0:
-                reward -= 500
+                reward -= 5000
             else:
                 reward -= 1
 
         done = (done == self.number_of_cars)
 
         if done:
-            reward = 10000
+            reward = 1000000
 
         return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 

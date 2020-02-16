@@ -18,7 +18,7 @@ state_space_size = env.state_space_size
 
 q_table = np.zeros([state_space_size, action_space_size])
 
-NUM_EPISODES = 20000
+NUM_EPISODES = 10000
 MAX_STEPS_PER_EPISODE = 200
 
 
@@ -70,7 +70,7 @@ for episode in range(NUM_EPISODES):
         q_table[state, action] = (1 - LEARNING_RATE) * q_table[state, action] + LEARNING_RATE * (reward + DISCOUNT_RATE * np.max(q_table[new_state, :]))
 
         state = new_state
-
+        env.decode_space(state)
         reward_current_episode += reward
 
         if done:
@@ -99,13 +99,13 @@ for i in range(lol):
     done = False
     i = 0
     while not done and i < 100:
-        env.render()
+        # env.render()
         action = np.argmax(q_table[state, :])
         state, reward, done, info = env.step(action)
         current_reward += reward
         # time.sleep(0.300)
         i+=1
-    env.render()
+    # env.render()
     # env.render()
     if done:
         print(" ############## GOAL ################3 ")

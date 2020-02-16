@@ -25,10 +25,10 @@ def parser(file):
                     #     mapp[y, x] = 1
                     #     car_position = {'x': x, 'y': y}
                     if line[x] == 'G':
-                        mapp[y, x] = 2
+                        mapp[y, x] = 10000
                         goal_position = {'x': x, 'y': y}
                     if line[x] == 'S':
-                        mapp[y, x] = 3
+                        mapp[y, x] = 50000
                     elif line[x] == '#':
                         mapp[y, x] = -1
 

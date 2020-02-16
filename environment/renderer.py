@@ -51,7 +51,7 @@ class Renderer:
 
                 if self.map_[x, y] == -1:
                     pygame.draw.rect(self.screen, BLACK, gui_position({'x': y, 'y': x}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-                if self.map_[x, y] == 3:
+                if self.map_[x, y] == 50000:
                     pygame.draw.rect(self.screen, RED, gui_position({'x': y, 'y': x}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
 
 
