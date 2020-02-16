@@ -5,101 +5,128 @@ import random
 import time
 from renderer import Renderer
 
-ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3}
+ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
+
+
+class ActionSpace:
+
+    def __init__(self, n):
+        assert( n >= 0)
+        self.n = n
+
+    def sample(self):
+        return np.random.randint(self.n)
 
 class TaxiEnv:
 
-    class ActionError(Exception):
-        pass
+    MUR = -1
 
-    def __init__(self, size):
+    def __init__(self, map_size, number_of_cars):
 
-        self.size = size
-        self.map = np.zeros([size, size])
+        self.size = map_size
+        self.number_of_cars = number_of_cars
 
+        self.cars_positions = [{'x': 0, 'y': 0} for _ in range(number_of_cars)]
 
-        self.car_position_ = [0, 0]
-        self.destination_position_ = [int(size / 2), int(size / 2)]
+        self.map = np.zeros([map_size, map_size])
 
-        # self.parse()
-        self.renderer = Renderer(size, self.map)
+        self.action_space = ActionSpace(5 ** self.number_of_cars)
 
-        self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"]]
+        self.state_space_size = self.size ** (2 * (number_of_cars + 1))
+
+        self.car_position_ = {'x': 0, 'y': 0}
+        self.destination_position_ = {'x': int(map_size / 2), 'y': int(map_size / 2)}
+
+        self.parse()
+
+        self.renderer = Renderer(map_size, self.map, self.number_of_cars)
+        self.renderer.set_cars_position(self.cars_positions)
+        self.renderer.set_destination_position(self.destination_position_)
+
+        self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"], ACTIONS['IDLE']]
 
         self.reward = {'reached': 50, 'bad': -1}
 
-    def update_map(self, current):
-        self.map[current[1], current[0]] = 0
-        self.map[self.car_position_[1], self.car_position_[0]] = 1
 
     def parse(self):
-        self.map, self.car_position_, self.destination_position_ = tools.parser("map.txt")
+        self.map, self.car_position_, self.destination_position_ = tools.parser("map_2.txt")
 
     def info(self):
         pass
 
+    def coord_to_int(self, car_position):
+        return car_position['y'] * self.size + car_position['x']
+
+    def int_to_coord(self, car_position_number):
+        return {'x': car_position_number % self.size, 'y': car_position_number // self.size}
+
     def reset(self):
 
-        self.map = np.zeros([self.size, self.size])
-        self.car_position_ = [0, 0]
-        # self.destination_position_ = [int(self.size / 2), int(self.size / 2)]
+        # self.map[self.car_position_['y'], self.car_position_['x']] = 1
+        self.parse()
 
+        # self.destination_position_['x'] = int(random.randint(0, self.size - 1))
+        # self.destination_position_['y'] = int(random.randint(0, self.size - 1))
 
-        # self.car_position_ = [random.randint(0, self.size - 1), random.randint(0, self.size - 1)]
-        self.destination_position_ = [int(random.randint(0, self.size - 1)), int(random.randint(0, self.size - 1))]
-        # self.destination_position_ = [2, 2]
+        for i in range(self.number_of_cars):
+            car_position = self.cars_positions[i]
 
-        # while self.car_position_ == self.destination_position_:
-        #     self.destination_position_ = [random.randint(0, self.size - 1), random.randint(0, self.size - 1)]
+            car_position['x'] = int(random.randint(0, self.size - 1))
+            car_position['y'] = int(random.randint(0, self.size - 1))
 
-        self.map[self.car_position_[1], self.car_position_[0]] = 1
-        self.map[self.destination_position_[1], self.destination_position_[0]] = 2
+            while self.position_value(car_position) == -1:
+                car_position['x'] = int(random.randint(0, self.size - 1))
+                car_position['y'] = int(random.randint(0, self.size - 1))
 
-        self.renderer.update_map(self.map)
+        # while self.position_value(self.destination_position_) == -1:
+        #     self.destination_position_['x'] = int(random.randint(0, self.size - 1))
+        #     self.destination_position_['y'] = int(random.randint(0, self.size - 1))
 
-        return self.lol()
+        return self.encode_space(self.cars_positions, self.destination_position_)
 
     def console_render(self):
-        print("#" * (self.size + 2))
 
         for y in range(self.size):
-            print("#", end='')
             for x in range(self.size):
-                if self.map[y,x] == 1:
+                if  {'x': x, 'y':y} == self.car_position_:
                     print("X", end='')
                 elif self.map[y,x] == 2:
                     print("G", end='')
+                elif self.map[y,x] == -1:
+                    print("#", end='')
+                elif self.map[y,x] == 3:
+                    print("S", end='')
                 else:
                     print(" ", end='')
-            print("#")
-        print("#" * (self.size + 2))
+            print("")
+        print("")
 
     def render(self):
 
         # self.console_render()
         self.renderer.render()
 
-    def lol(self):
+    def encode_space(self, cars_positions, destination):
 
-        return self.car_position_[1] * 8 + self.car_position_[0]
+        res = 0
 
-    def encode(self, taxi_row, taxi_col, destination):
+        for i in range(len(cars_positions)):
 
-        res = taxi_col
-        res *= self.size
+            res += cars_positions[i]['y']
+            res *= self.size
 
-        res += taxi_row
-        res *= self.size
+            res += cars_positions[i]['x']
+            res *= self.size
 
         # Destination col
-        res += destination[0]
+        res += destination['y']
         res *= self.size
 
         # Destination row
-        res += destination[1]
+        res += destination['x']
         return res
 
-    def decode(self, encoded_state):
+    def decode_space(self, encoded_state):
 
         out = []
 
@@ -126,40 +153,86 @@ class TaxiEnv:
         # out is [col, row, dest_col, dest_row]
         return out
 
+    def encode_action(self, actions_array):
+
+        res = 0
+        for i in range(len(actions_array) - 1):
+
+            res += actions_array[i]
+            res *= 5
+
+        res += actions_array[-1]
+
+        return res
+
+    def decode_action(self, encoded_action):
+
+        action_array = []
+
+        for i in range(self.number_of_cars):
+
+            action_array.append(encoded_action % 5)
+            encoded_action  = encoded_action // 5
+
+        return action_array
+
+
+
 
     def step(self, action):
 
-        if action not in self.ACTIONS:
-            raise ActionError("Actions does not exist")
+        action_array = self.decode_action(action)
 
-        current = self.car_position_[0], self.car_position_[1]
+        reward = 0
 
-        if action == ACTIONS["UP"] and self.car_position_[1] > 0:
-            self.car_position_[1] -= 1
-        elif action == ACTIONS["RIGHT"] and self.car_position_[0] < self.size - 1:
-            self.car_position_[0] += 1
-        elif action == ACTIONS["DOWN"] and self.car_position_[1] < self.size - 1:
-            self.car_position_[1] += 1
-        elif action == ACTIONS["LEFT"] and self.car_position_[0] > 0:
-            self.car_position_[0] -= 1
+        done = 0
 
-        self.update_map(current)
+        for i in range(self.number_of_cars):
+            mur = 0
 
-        done = int(self.car_position_ == self.destination_position_)
+            car_position = self.cars_positions[i]
+            action = action_array[i]
+
+            current = car_position.copy()
+
+            if action == ACTIONS["UP"] and car_position['y'] > 0:
+                car_position['y'] -= 1
+            elif action == ACTIONS["RIGHT"] and car_position['x'] < self.size - 1:
+                car_position['x'] += 1
+            elif action == ACTIONS["DOWN"] and car_position['y'] < self.size - 1:
+                car_position['y'] += 1
+            elif action == ACTIONS["LEFT"] and car_position['x'] > 0:
+                car_position['x'] -= 1
+
+            if self.position_value(car_position) == -1:
+                self.cars_positions[i] = current
+                mur += 1
+
+            if car_position == self.destination_position_:
+                reward += 200
+                done += 1
+            elif current == self.destination_position_:
+                reward -= 100
+            elif car_position == current:
+                reward -= 50
+            elif mur > 0:
+                reward -= 500
+            else:
+                reward -= 1
+
+        done = (done == self.number_of_cars)
 
         if done:
-            reward = self.reward['reached']
-        else:
-            reward = self.reward['bad']
+            reward = 10000
 
-        self.renderer.update_map(self.map)
-
-
-
-        return self.encode(self.car_position_[0], self.car_position_[1], (self.destination_position_[0], self.destination_position_[0])), reward, done, None
+        return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 
     def set_reward(new_reward):
         self.reward = new_reward
+
+    def position_value(self, position_dict):
+
+        return self.map[position_dict['y'], position_dict['x']]
 
 
 def main():

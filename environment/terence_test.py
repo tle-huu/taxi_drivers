@@ -9,14 +9,16 @@ from taxi_env import TaxiEnv
 
 from IPython.display import clear_output
 
-env = TaxiEnv(8)
 
-action_space_size = 4
-state_space_size = 8 * 8 * 8 * 8
+SIZE = 8
+env = TaxiEnv(SIZE, 2)
+
+action_space_size = env.action_space.n
+state_space_size = env.state_space_size
 
 q_table = np.zeros([state_space_size, action_space_size])
 
-NUM_EPISODES = 10000
+NUM_EPISODES = 20000
 MAX_STEPS_PER_EPISODE = 200
 
 
@@ -30,7 +32,7 @@ DISCOUNT_RATE = 0.95
 exploration_rate = 1
 max_exploration_rate = 1
 min_exploration_rate = 0.05
-exploration_decay_rate = 0.001
+exploration_decay_rate = 0.0001
 
 
 rewards_all_episodes = []
@@ -61,21 +63,9 @@ for episode in range(NUM_EPISODES):
         if exploration_rate_threshold > exploration_rate:
             action = np.argmax(q_table[state,:])
         else:
-            action = random.randint(0, 3)
+            action = env.action_space.sample()
 
         new_state, reward, done, info = env.step(action)
-
-        # if new_state in [5, 7, 11, 12]:
-        #     reward = -40
-        # elif done:
-        #     reward = 200
-        # else:
-        #     reward = -1
-
-        # if exploration_rate_threshold > exploration_rate:
-        #     action_2 = np.argmax(q_table[new_state,:])
-        # else:
-        #     action_2 = random.randint(0, 3)
 
         q_table[state, action] = (1 - LEARNING_RATE) * q_table[state, action] + LEARNING_RATE * (reward + DISCOUNT_RATE * np.max(q_table[new_state, :]))
 
@@ -108,17 +98,16 @@ for i in range(lol):
     current_reward = 0
     done = False
     i = 0
-    while not done and i < 20:
-        # env.render()
+    while not done and i < 100:
+        env.render()
         action = np.argmax(q_table[state, :])
         state, reward, done, info = env.step(action)
-        print(action, reward)
         current_reward += reward
         # time.sleep(0.300)
         i+=1
+    env.render()
     # env.render()
-    # env.render()
-    if reward == 50:
+    if done:
         print(" ############## GOAL ################3 ")
         wins += 1
     else:
