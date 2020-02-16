@@ -1,11 +1,19 @@
-import tools
+import environment.tools
 import pygame
 import numpy as np
 import random
 import time
-from renderer import Renderer
+from environment.renderer import Renderer
 
 ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3}
+
+class actionspace:
+    def __init__(self, actions):
+        self.actions = ACTIONS
+    
+    def sample(self):
+        return np.random.choice(list(self.actions.values()))
+
 
 class TaxiEnv:
 
@@ -25,9 +33,11 @@ class TaxiEnv:
         self.renderer = Renderer(size, self.map)
 
         self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"]]
-
+        
         self.reward = {'reached': 50, 'bad': -1}
-
+        
+        self.action_space = actionspace(self.ACTIONS)
+        
     def update_map(self, current):
         self.map[current[1], current[0]] = 0
         self.map[self.car_position_[1], self.car_position_[0]] = 1
@@ -129,9 +139,6 @@ class TaxiEnv:
 
     def step(self, action):
 
-        if action not in self.ACTIONS:
-            raise ActionError("Actions does not exist")
-
         current = self.car_position_[0], self.car_position_[1]
 
         if action == ACTIONS["UP"] and self.car_position_[1] > 0:
@@ -158,7 +165,7 @@ class TaxiEnv:
 
         return self.encode(self.car_position_[0], self.car_position_[1], (self.destination_position_[0], self.destination_position_[0])), reward, done, None
 
-    def set_reward(new_reward):
+    def set_reward(self,new_reward):
         self.reward = new_reward
 
 

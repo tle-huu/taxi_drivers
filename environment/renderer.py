@@ -9,8 +9,8 @@ YELLOW = (50, 50, 50)
 RED = ( 255, 0, 0)
 BLUE = ( 0, 0, 255 )
 
-WIDTH = 1000
-HEIGHT = 1000
+WIDTH = 500
+HEIGHT = 500
 WINDOWS_SIZE = (WIDTH, HEIGHT)
 
 def gui_position(positions, width, height, size):

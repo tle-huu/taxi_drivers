@@ -1,0 +1,11 @@
+{"gamma" :0.9,
+"epsilon" :0.9,
+"lr" : 0.01,
+"input_dims": [5,5],
+"n_actions" : 4,
+"mem_size" : 20,
+"eps_min" : 10,
+"batch_size" : 10,
+"replace" : 10,
+"eps_dec" : 100
+}
