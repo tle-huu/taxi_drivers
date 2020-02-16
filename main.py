@@ -43,7 +43,7 @@ if __name__ == '__main__':
         observation = env.reset()
         iterations = 0
         score = 0
-        while not done and iterations<200:
+        while not done and iterations<40:
             iterations += 1
             action = agent.choose_action(observation)
             observation_, reward, done, info = env.step(action)

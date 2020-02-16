@@ -78,9 +78,9 @@ class DQNAgent(Agent):
 
         states, actions, rewards, states_, dones = self.sample_memory()
         indices = np.arange(self.batch_size)
+        print(states.unsqueeze(1))
 
         q_pred = self.q_eval.forward(states.unsqueeze(1))[indices, actions]
-
         q_next = self.q_next.forward(states_.unsqueeze(1)).max(dim=1)[0]
         q_next[dones] = 0.0
 
