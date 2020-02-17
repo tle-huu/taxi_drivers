@@ -1,7 +1,7 @@
 import numpy as np
 import torch
-from Memory import ReplayBuffer
-from DRL import CarLeader
+from agent.Memory import ReplayBuffer
+from agent.DRL import CarLeader
 
 class Agent():
     def __init__(self, gamma, epsilon, lr, n_actions, input_dims,
@@ -61,7 +61,7 @@ class DQNAgent(Agent):
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation],dtype=torch.float).to(self.q_eval.device)
-            actions = self.q_eval.forward(state)
+            actions = self.q_eval.forward(state.unsqueeze(1))
             action = torch.argmax(actions).item()
         else:
             action = np.random.choice(self.action_space)
@@ -78,7 +78,6 @@ class DQNAgent(Agent):
 
         states, actions, rewards, states_, dones = self.sample_memory()
         indices = np.arange(self.batch_size)
-        print(states.unsqueeze(1))
 
         q_pred = self.q_eval.forward(states.unsqueeze(1))[indices, actions]
         q_next = self.q_next.forward(states_.unsqueeze(1)).max(dim=1)[0]

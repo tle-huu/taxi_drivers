@@ -30,7 +30,7 @@ class CarLeader(nn.Module):
 
         features = int(dimensions_after_conv(grid_shape, 64))
         self.fc1 = nn.Sequential(nn.Linear(features, 32), nn.ReLU(True))
-        self.fc2 = nn.Linear(32, 4)
+        self.fc2 = nn.Linear(32, 5)
         self.loss = nn.MSELoss()
         self.device = torch.device("cpu")
         self.optimizer = optim.RMSprop(self.parameters(), lr = 0.01)

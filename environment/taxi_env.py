@@ -1,9 +1,9 @@
-import tools
+import environment.tools
 import pygame
 import numpy as np
 import random
 import time
-from renderer import Renderer
+from environment.renderer import Renderer
 
 ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
 
@@ -48,7 +48,7 @@ class TaxiEnv:
 
 
     def parse(self):
-        self.map, self.car_position_, self.destination_position_ = tools.parser("map_2.txt")
+        self.map, self.car_position_, self.destination_position_ = environment.tools.parser("environment/map_2.txt")
 
     def info(self):
         pass
