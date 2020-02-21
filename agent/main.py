@@ -62,7 +62,9 @@ if __name__ == '__main__':
         scores.append(score)
         print(score)
     print("lets test")
-    for i in range(20):
+    success = 0
+    tests = 20
+    for i in range(tests):
         state = env.decode_space(env.reset())
         env.render()
         done = False
@@ -71,12 +73,15 @@ if __name__ == '__main__':
             while not done and it<40:
                 it += 1
                 state = torch.tensor([state],dtype=torch.float).to(agent.q_eval.device)
-                actions = agent.q_eval.forward(state.unsqueeze(1))
+                actions = agent.q_eval.forward(state)
                 action = torch.argmax(actions).item()
                 observation, reward, done, info = env.step(action)
-                time.sleep(1)
+                time.sleep(0.3)
                 env.render()
                 state = env.decode_space(observation)
+            if done :
+                success+=1
+    print(success/tests)
             
     
     

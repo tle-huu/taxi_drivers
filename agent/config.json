@@ -1,7 +1,7 @@
 {"gamma" :0.9,
 "epsilon" :0.5,
 "lr" : 0.01,
-"input_dims": [8,8],
+"input_dims": [3,8,8],
 "n_actions" : 5,
 "mem_size" : 64,
 "eps_min" : 0.01,

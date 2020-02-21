@@ -61,7 +61,7 @@ class DQNAgent(Agent):
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation],dtype=torch.float).to(self.q_eval.device)
-            actions = self.q_eval.forward(state.unsqueeze(1))
+            actions = self.q_eval.forward(state)
             action = torch.argmax(actions).item()
         else:
             action = np.random.choice(self.action_space)
@@ -79,8 +79,8 @@ class DQNAgent(Agent):
         states, actions, rewards, states_, dones = self.sample_memory()
         indices = np.arange(self.batch_size)
 
-        q_pred = self.q_eval.forward(states.unsqueeze(1))[indices, actions]
-        q_next = self.q_next.forward(states_.unsqueeze(1)).max(dim=1)[0]
+        q_pred = self.q_eval.forward(states)[indices, actions]
+        q_next = self.q_next.forward(states_).max(dim=1)[0]
         q_next[dones] = 0.0
 
         q_target = rewards + self.gamma*q_next
@@ -89,5 +89,6 @@ class DQNAgent(Agent):
         loss.backward()
         self.q_eval.optimizer.step()
         self.learn_step_counter += 1
+        self.q_eval.scheduler.step(loss)
 
         self.decrement_epsilon()

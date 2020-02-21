@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 def dimensions_after_conv(grid_shape, channels_number):
-    return channels_number * (grid_shape[0] * grid_shape[1])
+    return channels_number * (grid_shape[-1] * grid_shape[-2])
 
 
 class CarLeader(nn.Module):
@@ -13,7 +13,7 @@ class CarLeader(nn.Module):
         super(CarLeader, self).__init__()
 
 
-        self.convs1 = nn.Sequential(nn.Conv2d(1, 16, kernel_size = 3, padding = 1),
+        self.convs1 = nn.Sequential(nn.Conv2d(3, 16, kernel_size = 3, padding = 1),
                                     nn.BatchNorm2d(16),
                                     nn.ReLU(True))
 
@@ -34,7 +34,16 @@ class CarLeader(nn.Module):
         self.loss = nn.MSELoss()
         self.device = torch.device("cpu")
         self.optimizer = optim.RMSprop(self.parameters(), lr = 0.01)
-        
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
+                                                     mode='min',
+                                                     factor=0.5,
+                                                     patience=1000,
+                                                     verbose=True,
+                                                     threshold=0.0001,
+                                                     threshold_mode='rel',
+                                                     cooldown=10,
+                                                     min_lr=0,
+                                                     eps=1e-08)
     def forward(self, x):
         """
         X is the grid dimension should be (n,1, gridshape[0], gridshape[1]) with n being
@@ -49,13 +58,3 @@ class CarLeader(nn.Module):
         x = self.fc1(x)
         x = self.fc2(x)
         return x
-"""
-Pour tester :
-grille = torch.rand(5,5).unsqueeze(0)
-grille = (grille<0.5).float()
-grille =grille.unsqueeze(0)
-
-traf = CarLeader([5,5])
-traf(grille)
-
-"""

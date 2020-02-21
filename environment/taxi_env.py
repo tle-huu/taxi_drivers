@@ -137,9 +137,11 @@ class TaxiEnv:
         destination_y = encoded_state % self.size
         encoded_state = encoded_state // self.size
 
-        map_out = self.map.copy()
+        map_out = np.zeros((self.size, self.size, 3))
 
-        map_out[destination_y][destination_x] = 10000
+        # map_out = self.map.copy()
+
+        map_out[destination_y][destination_x] = np.array([100, 100, 66])
 
         for i in range(self.number_of_cars):
 
@@ -149,9 +151,17 @@ class TaxiEnv:
             y = encoded_state % self.size
             encoded_state = encoded_state // self.size
 
-            map_out[y][x] += 1
+            if self.map[y][x] == -1:
+                map_out[y][x] = np.array([0, 0, 0])
+            elif self.map[y][x] == 0:
+                map_out[y][x] = np.array([65, 74, 0])
+            elif self.map[y][x] > 0:
+                map_out[y][x] = np.array([0, 0, 255])
 
-        return map_out
+            # map_out[y][x] = np.array([])
+            # map_out[y][x] += 1
+
+        return map_out.T
 
     def encode_action(self, actions_array):
 
