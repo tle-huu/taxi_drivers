@@ -8,7 +8,7 @@ from IPython.display import clear_output
 import torch
 import time
 
-env = TaxiEnv(8,1)
+
 
 
 
@@ -16,7 +16,7 @@ with open('agent/config.json') as json_file:
     config = json.load(json_file)
 
 
-
+env = TaxiEnv(config["input_dims"][-1],config["number_of_cars"])
 
 
 
@@ -74,7 +74,7 @@ if __name__ == '__main__':
                 it += 1
                 state = torch.tensor([state],dtype=torch.float).to(agent.q_eval.device)
                 actions = agent.q_eval.forward(state)
-                action = torch.argmax(actions).item()
+                action = torch.argmax(actions, dim=2)
                 observation, reward, done, info = env.step(action)
                 time.sleep(0.3)
                 env.render()

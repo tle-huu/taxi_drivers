@@ -8,7 +8,7 @@ def dimensions_after_conv(grid_shape, channels_number):
 
 class CarLeader(nn.Module):
 
-    def __init__(self, grid_shape):
+    def __init__(self, grid_shape, number_of_cars=1):
 
         super(CarLeader, self).__init__()
 
@@ -27,10 +27,10 @@ class CarLeader(nn.Module):
         
         
         self.flatten = torch.nn.Flatten()
-
+        self.number_of_cars = number_of_cars
         features = int(dimensions_after_conv(grid_shape, 64))
         self.fc1 = nn.Sequential(nn.Linear(features, 32), nn.ELU(True))
-        self.fc2 = nn.Linear(32, 5)
+        self.fcout = [nn.Linear(32, 5) for i in range(self.number_of_cars)]
         self.loss = nn.MSELoss()
         self.device = torch.device("cpu")
         self.optimizer = optim.RMSprop(self.parameters(), lr = 0.01)
@@ -44,6 +44,7 @@ class CarLeader(nn.Module):
                                                      cooldown=10,
                                                      min_lr=0,
                                                      eps=1e-08)
+    
     def forward(self, x):
         """
         X is the grid dimension should be (n,1, gridshape[0], gridshape[1]) with n being
@@ -56,5 +57,7 @@ class CarLeader(nn.Module):
         x = self.convs3(x)
         x = self.flatten(x)
         x = self.fc1(x)
-        x = self.fc2(x)
-        return x
+        out = torch.tensor([])
+        for layer in self.fcout:
+            out = torch.cat((out,layer(x).unsqueeze(1)), dim = 1)
+        return out

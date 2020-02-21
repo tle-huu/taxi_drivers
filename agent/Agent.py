@@ -6,7 +6,7 @@ from agent.DRL import CarLeader
 class Agent():
     def __init__(self, gamma, epsilon, lr, n_actions, input_dims,
                  mem_size, batch_size, eps_min=0.01, eps_dec=5e-7,
-                 replace=1000):
+                 replace=1000, number_of_cars=1):
         
         self.gamma = gamma
         self.epsilon = epsilon
@@ -19,6 +19,7 @@ class Agent():
         self.learn_step_counter = 0
         self.batch_size = batch_size
         self.replace_target_cnt = replace
+        self.number_of_cars = number_of_cars
 
         self.memory = ReplayBuffer(mem_size, input_dims, n_actions)
 
@@ -55,14 +56,14 @@ class DQNAgent(Agent):
     def __init__(self, *args, **kwargs):
         super(DQNAgent, self).__init__(*args, **kwargs)
 
-        self.q_eval = CarLeader(self.input_dims)
-        self.q_next = CarLeader(self.input_dims)
+        self.q_eval = CarLeader(self.input_dims, self.number_of_cars)
+        self.q_next = CarLeader(self.input_dims, self.number_of_cars)
 
     def choose_action(self, observation):
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation],dtype=torch.float).to(self.q_eval.device)
             actions = self.q_eval.forward(state)
-            action = torch.argmax(actions).item()
+            action = torch.argmax(actions, dim=2)
         else:
             action = np.random.choice(self.action_space)
 
@@ -78,7 +79,7 @@ class DQNAgent(Agent):
 
         states, actions, rewards, states_, dones = self.sample_memory()
         indices = np.arange(self.batch_size)
-
+        
         q_pred = self.q_eval.forward(states)[indices, actions]
         q_next = self.q_next.forward(states_).max(dim=1)[0]
         q_next[dones] = 0.0
