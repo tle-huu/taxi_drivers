@@ -1,11 +1,11 @@
 {"gamma" :0.9,
-"epsilon" :0.5,
+"epsilon" : 1,
 "lr" : 0.01,
-"input_dims": [3,8,8],
+"input_dims": [3, 8, 8],
 "n_actions" : 5,
 "mem_size" : 64,
-"eps_min" : 0.01,
+"eps_min" : 0.1,
 "batch_size" : 32,
 "replace" : 100,
-"eps_dec" : 0.000005
+"eps_dec" : 0.0001
 }

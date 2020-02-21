@@ -29,7 +29,7 @@ class CarLeader(nn.Module):
         self.flatten = torch.nn.Flatten()
 
         features = int(dimensions_after_conv(grid_shape, 64))
-        self.fc1 = nn.Sequential(nn.Linear(features, 32), nn.ReLU(True))
+        self.fc1 = nn.Sequential(nn.Linear(features, 32), nn.ELU(True))
         self.fc2 = nn.Linear(32, 5)
         self.loss = nn.MSELoss()
         self.device = torch.device("cpu")

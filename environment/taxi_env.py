@@ -217,21 +217,19 @@ class TaxiEnv:
                 mur += 1
 
             if car_position == self.destination_position_:
-                reward += 200
+                reward += 100
                 done += 1
-            elif current == self.destination_position_:
-                reward -= 500
-            elif car_position == current:
-                reward -= 50
-            elif mur > 0:
-                reward -= 5000
+            # elif current == self.destination_position_:
+            #     reward -= 500
+            # elif car_position == current:
+            #     reward -= 50
+            if mur > 0:
+                reward -= 10
+                # done = 1
             else:
                 reward -= 1
 
         done = (done == self.number_of_cars)
-
-        if done:
-            reward = 1000000
 
         return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 
