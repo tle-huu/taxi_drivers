@@ -31,7 +31,7 @@ if __name__ == '__main__':
             action = env.action_space.sample()
             observation_, reward, done, info = env.step(action)
             agent.store_transition(env.decode_space(observation),
-                                   action,
+                                   env.decode_action(action),
                                    reward,
                                    env.decode_space(observation_),
                                    done)
@@ -49,11 +49,11 @@ if __name__ == '__main__':
         score = 0
         while not done and iterations<200:
             iterations += 1
-            action = agent.choose_action(env.decode_space(observation))
+            action = env.encode_action(agent.choose_action(env.decode_space(observation)))
             observation_, reward, done, info = env.step(action)
             score += reward
             agent.store_transition(env.decode_space(observation),
-                                   action,
+                                   env.decode_action(action),
                                    reward,
                                    env.decode_space(observation_),
                                    done)

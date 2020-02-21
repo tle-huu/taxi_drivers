@@ -21,7 +21,7 @@ class Agent():
         self.replace_target_cnt = replace
         self.number_of_cars = number_of_cars
 
-        self.memory = ReplayBuffer(mem_size, input_dims, n_actions)
+        self.memory = ReplayBuffer(mem_size, input_dims, n_actions, number_of_cars)
 
     def store_transition(self, state, action, reward, state_, done):
         self.memory.store_transition(state, action, reward, state_, done)
@@ -65,7 +65,7 @@ class DQNAgent(Agent):
             actions = self.q_eval.forward(state)
             action = torch.argmax(actions, dim=2)
         else:
-            action = np.random.choice(self.action_space)
+            action = np.array([np.random.choice(self.action_space) for i in range(self.number_of_cars)])
 
         return action
 
@@ -79,8 +79,9 @@ class DQNAgent(Agent):
 
         states, actions, rewards, states_, dones = self.sample_memory()
         indices = np.arange(self.batch_size)
-        
-        q_pred = self.q_eval.forward(states)[indices, actions]
+        print(actions.size())
+        print(self.q_eval.forward(states).size())
+        q_pred = self.q_eval.forward(states)[indices, actions.long()]
         q_next = self.q_next.forward(states_).max(dim=1)[0]
         q_next[dones] = 0.0
 

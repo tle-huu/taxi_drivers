@@ -1,7 +1,7 @@
 import numpy as np
 
 class ReplayBuffer():
-    def __init__(self, max_size, input_shape, n_actions):
+    def __init__(self, max_size, input_shape, n_actions, number_of_cars):
         self.mem_size = max_size
         self.mem_cntr = 0
         self.state_memory = np.zeros((self.mem_size, *input_shape),
@@ -9,7 +9,7 @@ class ReplayBuffer():
         self.new_state_memory = np.zeros((self.mem_size, *input_shape),
                                          dtype=np.float32)
 
-        self.action_memory = np.zeros(self.mem_size, dtype=np.int64)
+        self.action_memory = np.zeros((self.mem_size, number_of_cars), dtype=np.int32)
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
         self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
 
