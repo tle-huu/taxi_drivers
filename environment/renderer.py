@@ -21,8 +21,9 @@ def gui_position(positions, width, height, size):
 
 class Renderer:
 
-    def __init__(self, size, town_map, number_of_cars):
+    def __init__(self, size, town_map, number_of_cars, taxi_env):
 
+        self.taxi_env = taxi_env
 
         self.size_ = size
         self.WIDTH_ = WIDTH
@@ -41,20 +42,26 @@ class Renderer:
 
         pygame.init()
 
-    def draw_arrow(self, x, y, direction):
+    def draw_arrow(self, x, y, direction, force = None):
 
         SQUARE_SIZE = self.WIDTH_ / self.size_
 
-        ARROW_LENGTH = int(SQUARE_SIZE / 8)
+        ARROW_LENGTH = int(SQUARE_SIZE / 12)
         ARROW_DEMI_LENGTH = int(ARROW_LENGTH / 2)
 
+        if force is None or force <= 0:
+            return
+        else:
+            force *= int(SQUARE_SIZE / 3)
+
+
+        # Be carefule, y axis is pointing down
         def rotate(x, y):
-            return y, -x
+            return -y, x
 
         x = x + int(SQUARE_SIZE / 2)
         y = y + int(SQUARE_SIZE / 2)
 
-        force = int(SQUARE_SIZE / 4 )
 
         droite = [force, 0]
         haut = [0, -ARROW_DEMI_LENGTH]
@@ -77,32 +84,15 @@ class Renderer:
             points.append([current[0] + v[0], current[1] + v[1]])
             current = points[-1]
 
-
         pygame.draw.polygon(self.screen, BLACK, points)
-    # pygame.draw.polygon(window, (0, 0, 0), ((0, 100), (0, 200), (200, 200), (200, 300), (300, 150), (200, 0), (200, 100)))
 
-
-    def render(self):
+    def render(self, q_table = None):
 
         self.screen = pygame.display.set_mode(WINDOWS_SIZE)
         pygame.display.set_caption("My First Game")
         self.screen.fill(GREEN)
 
 
-        for x in range(self.size_):
-            for y in range(self.size_):
-
-                current = {'x': y, 'y': x}
-
-                if self.map_[x, y] == -1:
-                    pygame.draw.rect(self.screen, BLACK, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-                if self.map_[x, y] == 50000:
-                    pygame.draw.rect(self.screen, RED, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['LEFT'])
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['UP'])
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['RIGHT'])
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['DOWN'])
 
         for x in range(self.size_):
             pygame.draw.line(self.screen, RED, [x * self.WIDTH_ / self.size_, 0], [x * self.WIDTH_ / self.size_, self.HEIGHT_], 1)
@@ -117,6 +107,36 @@ class Renderer:
             else:
                 pygame.draw.rect(self.screen, BLUE, gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
         
+        for x in range(self.size_):
+            for y in range(self.size_):
+
+                current = {'x': y, 'y': x}
+
+                if self.map_[x, y] == -1:
+                    pygame.draw.rect(self.screen, BLACK, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+                if self.map_[x, y] == 50000:
+                    pygame.draw.rect(self.screen, RED, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+
+                if q_table is None:
+                    continue
+               
+                q_row = q_table[self.taxi_env.encode_space([current], self.taxi_env.destination_position_)].copy()
+     
+
+                if np.max(q_row) > 0:
+                    q_row /= np.max(q_row)
+                    
+                # print(q_row)
+
+                # d = np.argmax(q_row)
+
+                # self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), d, q_row[d] if q_row[d] > 0 else 0)
+
+
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['LEFT'], q_row[DIRECTION['LEFT']])
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['UP'], q_row[DIRECTION['UP']])
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['RIGHT'], q_row[DIRECTION['RIGHT']])
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['DOWN'], q_row[DIRECTION['DOWN']])
 
         # Rerender
         pygame.display.flip()

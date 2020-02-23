@@ -5,7 +5,8 @@ import random
 import time
 from renderer import Renderer
 
-ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
+# ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
+ACTIONS = {"RIGHT": 0, "DOWN": 1, "LEFT": 2, "UP": 3, "IDLE": 4}
 
 
 class ActionSpace:
@@ -38,17 +39,17 @@ class TaxiEnv:
 
         self.parse()
 
-        self.renderer = Renderer(map_size, self.map, self.number_of_cars)
+        self.renderer = Renderer(map_size, self.map, self.number_of_cars, self)
         self.renderer.set_cars_position(self.cars_positions)
         self.renderer.set_destination_position(self.destination_position_)
 
-        self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"], ACTIONS['IDLE']]
+        self.ACTIONS = [ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"], ACTIONS["UP"], ACTIONS['IDLE']]
 
         self.reward = {'reached': 50, 'bad': -1}
 
 
     def parse(self):
-        self.map, _, _ = environment.tools.parser("map_2.txt")
+        self.map, _, _ = tools.parser("map_2.txt")
 
     def info(self):
         pass
@@ -100,10 +101,10 @@ class TaxiEnv:
             print("")
         print("")
 
-    def render(self):
+    def render(self, q_table = None):
 
         # self.console_render()
-        self.renderer.render()
+        self.renderer.render(q_table)
 
 
 
@@ -206,22 +207,36 @@ class TaxiEnv:
                 self.cars_positions[i] = current
                 mur += 1
 
+        #     if car_position == self.destination_position_:
+        #         reward += 200
+        #         done += 1
+        #     elif current == self.destination_position_:
+        #         reward -= 500
+        #     elif car_position == current:
+        #         reward -= 50
+        #     elif mur > 0:
+        #         reward -= 5000
+        #     else:
+        #         reward -= 1
+
+        # done = (done == self.number_of_cars)
+
+        # if done:
+        #     reward = 1000000
+
             if car_position == self.destination_position_:
-                reward += 200
+                reward += 100
                 done += 1
-            elif current == self.destination_position_:
-                reward -= 500
-            elif car_position == current:
-                reward -= 50
-            elif mur > 0:
-                reward -= 5000
+            # elif current == self.destination_position_:
+            #     reward -= 500
+            # elif car_position == current:
+            #     reward -= 50
+            if mur > 0:
+                reward -= 10
+                # done = 1
             else:
                 reward -= 1
-
         done = (done == self.number_of_cars)
-
-        if done:
-            reward = 1000000
 
         return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 

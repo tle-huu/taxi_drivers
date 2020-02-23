@@ -11,7 +11,7 @@ from IPython.display import clear_output
 
 
 SIZE = 10
-env = TaxiEnv(SIZE, 2)
+env = TaxiEnv(SIZE, 1)
 
 action_space_size = env.action_space.n
 state_space_size = env.state_space_size
@@ -25,8 +25,8 @@ q_table = np.zeros([state_space_size, action_space_size])
 #     for j in range(action_space_size):
 #         q_table[i][j] = np.random.random() * 1000
 
-NUM_EPISODES = 2
-MAX_STEPS_PER_EPISODE = 50
+NUM_EPISODES = 50000
+MAX_STEPS_PER_EPISODE = 200
 
 
 ## Alpha
@@ -93,6 +93,10 @@ for episode in range(NUM_EPISODES):
     rewards_all_episodes.append(reward_current_episode)
 
 print("Traning done")
+print("q table")
+print(np.max(q_table))
+
+# q_table = q_table / np.max(q_table)
 print("success rate: %03f" % (success / NUM_EPISODES) )
 # print(q_table)
 
@@ -111,15 +115,15 @@ for i in range(lol):
     done = False
     i = 0
     while not done and i < 50:
-        env.render()
+        env.render(q_table)
         action = np.argmax(q_table[state, :])
         # print(env.decode_action(action))
         state, reward, done, info = env.step(action)
         current_reward += reward
-        time.sleep(0.100)
+        time.sleep(0.4)
         i+=1
-    env.render()
-    env.render()
+    env.render(q_table)
+    env.render(q_table)
     if done:
         print(" ############## GOAL ################3 ")
         wins += 1
