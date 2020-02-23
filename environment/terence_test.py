@@ -25,7 +25,7 @@ q_table = np.zeros([state_space_size, action_space_size])
 #     for j in range(action_space_size):
 #         q_table[i][j] = np.random.random() * 1000
 
-NUM_EPISODES = 50000
+NUM_EPISODES = 1000
 MAX_STEPS_PER_EPISODE = 200
 
 
@@ -94,7 +94,6 @@ for episode in range(NUM_EPISODES):
 
 print("Traning done")
 print("q table")
-print(np.max(q_table))
 
 # q_table = q_table / np.max(q_table)
 print("success rate: %03f" % (success / NUM_EPISODES) )

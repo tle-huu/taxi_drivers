@@ -69,7 +69,12 @@ class Renderer:
         diag_haut = [-ARROW_DEMI_LENGTH, ARROW_DEMI_LENGTH]
         bas = [0, -ARROW_DEMI_LENGTH]
 
-        vecs = [droite, haut, diag_bas, diag_haut, bas]
+        diag_droite = [int(SQUARE_SIZE / 2), int(SQUARE_SIZE / 2)]
+        diag_gauche = [-int(SQUARE_SIZE / 2), int(SQUARE_SIZE / 2)]
+        haut = [0, -int(SQUARE_SIZE / 2)]
+
+        # vecs = [droite, haut, diag_bas, diag_haut, bas]
+        vecs = [haut, diag_droite, diag_gauche, haut]
 
         for i in range(len(vecs)):
             a, b = vecs[i]
@@ -84,14 +89,13 @@ class Renderer:
             points.append([current[0] + v[0], current[1] + v[1]])
             current = points[-1]
 
-        pygame.draw.polygon(self.screen, BLACK, points)
+        pygame.draw.polygon(self.screen, RED, points)
 
     def render(self, q_table = None):
 
         self.screen = pygame.display.set_mode(WINDOWS_SIZE)
         pygame.display.set_caption("My First Game")
         self.screen.fill(GREEN)
-
 
 
         for x in range(self.size_):
@@ -107,6 +111,19 @@ class Renderer:
             else:
                 pygame.draw.rect(self.screen, BLUE, gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
         
+
+            # print(q_row)
+            q_row = q_table[self.taxi_env.encode_space([car_position], self.taxi_env.destination_position_)].copy()
+
+            if np.max(q_row) > 0:
+                q_row /= np.max(q_row)
+            d = np.argmax(q_row)
+            font = pygame.font.SysFont("comicsansms", 15)
+            text = font.render(str(round(np.max(q_row), 2)), True, (0, 0, 0))
+
+            self.draw_arrow(*gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_), d, q_row[d] if q_row[d] > 0 else 0)
+            self.screen.blit(text, (gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_)[0], gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_)[1]))
+
         for x in range(self.size_):
             for y in range(self.size_):
 
@@ -119,24 +136,18 @@ class Renderer:
 
                 if q_table is None:
                     continue
+
+
                
-                q_row = q_table[self.taxi_env.encode_space([current], self.taxi_env.destination_position_)].copy()
      
 
-                if np.max(q_row) > 0:
-                    q_row /= np.max(q_row)
-                    
-                # print(q_row)
 
-                # d = np.argmax(q_row)
-
-                # self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), d, q_row[d] if q_row[d] > 0 else 0)
-
-
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['LEFT'], q_row[DIRECTION['LEFT']])
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['UP'], q_row[DIRECTION['UP']])
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['RIGHT'], q_row[DIRECTION['RIGHT']])
-                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['DOWN'], q_row[DIRECTION['DOWN']])
+                # self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['LEFT'], q_row[DIRECTION['LEFT']])
+                # self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['UP'], q_row[DIRECTION['UP']])
+                # self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['RIGHT'], q_row[DIRECTION['RIGHT']])
+                # self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['DOWN'], q_row[DIRECTION['DOWN']])
+                # pygame.draw.line(self.screen, BLACK, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), gui_position({'x': x + 1, 'y':y - 1}, self.WIDTH_, self.HEIGHT_, self.size_), 1)
+                # pygame.draw.line(self.screen, BLACK, gui_position({'x': x, 'y':y - 1}, self.WIDTH_, self.HEIGHT_, self.size_), gui_position({'x': x + 1, 'y': y}, self.WIDTH_, self.HEIGHT_, self.size_), 1)
 
         # Rerender
         pygame.display.flip()

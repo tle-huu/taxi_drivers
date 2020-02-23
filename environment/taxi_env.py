@@ -76,11 +76,11 @@ class TaxiEnv:
                 car_position['y'] = int(random.randint(0, self.size - 1))
 
 
-        self.destination_position_['x'] = int(random.randint(0, self.size - 1))
-        self.destination_position_['y'] = int(random.randint(0, self.size - 1))
-        while self.position_value(self.destination_position_) == -1:
-            self.destination_position_['x'] = int(random.randint(0, self.size - 1))
-            self.destination_position_['y'] = int(random.randint(0, self.size - 1))
+        self.destination_position_['x'] = 5 # int(random.randint(0, self.size - 1))
+        self.destination_position_['y'] = 8 # int(random.randint(0, self.size - 1))
+        # while self.position_value(self.destination_position_) == -1:
+        #     self.destination_position_['x'] = int(random.randint(0, self.size - 1))
+        #     self.destination_position_['y'] = int(random.randint(0, self.size - 1))
 
         return self.encode_space(self.cars_positions, self.destination_position_)
 
