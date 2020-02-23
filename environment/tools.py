@@ -20,7 +20,7 @@ def parser(file):
                 mapp = np.zeros([height, width])
                 y = -1
             else:
-                for x in range(width):
+                for x in range(len(line)):
                     # if line[x] == 'X':
                     #     mapp[y, x] = 1
                     #     car_position = {'x': x, 'y': y}

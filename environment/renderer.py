@@ -5,13 +5,15 @@ import numpy as np
 BLACK = ( 0, 0, 0)
 WHITE = ( 255, 255, 255)
 GREEN = ( 65, 74, 0)
-YELLOW = (50, 50, 50)
+YELLOW = (200, 230, 50)
 RED = ( 255, 0, 0)
 BLUE = ( 0, 0, 255 )
 
 WIDTH = 1000
 HEIGHT = 1000
 WINDOWS_SIZE = (WIDTH, HEIGHT)
+
+DIRECTION = {"RIGHT": 0, "DOWN": 1, "LEFT": 2, "UP": 3, "IDLE": 4}
 
 def gui_position(positions, width, height, size):
 
@@ -29,7 +31,7 @@ class Renderer:
         self.number_of_cars = number_of_cars
         self.cars_positions = None
 
-        self.destination_position_ = {'x': -1, 'y': -1}
+        self.destination_position_ = {'x': -10, 'y': -10}
         self.car_position_ = {'x': -1, 'y': -1}
         self.running_ = False
 
@@ -39,6 +41,46 @@ class Renderer:
 
         pygame.init()
 
+    def draw_arrow(self, x, y, direction):
+
+        SQUARE_SIZE = self.WIDTH_ / self.size_
+
+        ARROW_LENGTH = int(SQUARE_SIZE / 8)
+        ARROW_DEMI_LENGTH = int(ARROW_LENGTH / 2)
+
+        def rotate(x, y):
+            return y, -x
+
+        x = x + int(SQUARE_SIZE / 2)
+        y = y + int(SQUARE_SIZE / 2)
+
+        force = int(SQUARE_SIZE / 4 )
+
+        droite = [force, 0]
+        haut = [0, -ARROW_DEMI_LENGTH]
+        diag_bas = [ARROW_DEMI_LENGTH, ARROW_DEMI_LENGTH]
+        diag_haut = [-ARROW_DEMI_LENGTH, ARROW_DEMI_LENGTH]
+        bas = [0, -ARROW_DEMI_LENGTH]
+
+        vecs = [droite, haut, diag_bas, diag_haut, bas]
+
+        for i in range(len(vecs)):
+            a, b = vecs[i]
+            for _ in range(direction):
+                a, b = rotate(a, b)
+            vecs[i] = [a, b]
+
+
+        points = [[x, y]]
+        current = points[-1]
+        for v in vecs:
+            points.append([current[0] + v[0], current[1] + v[1]])
+            current = points[-1]
+
+
+        pygame.draw.polygon(self.screen, BLACK, points)
+    # pygame.draw.polygon(window, (0, 0, 0), ((0, 100), (0, 200), (200, 200), (200, 300), (300, 150), (200, 0), (200, 100)))
+
 
     def render(self):
 
@@ -46,20 +88,29 @@ class Renderer:
         pygame.display.set_caption("My First Game")
         self.screen.fill(GREEN)
 
+
         for x in range(self.size_):
             for y in range(self.size_):
 
-                if self.map_[x, y] == -1:
-                    pygame.draw.rect(self.screen, BLACK, gui_position({'x': y, 'y': x}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-                if self.map_[x, y] == 50000:
-                    pygame.draw.rect(self.screen, RED, gui_position({'x': y, 'y': x}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+                current = {'x': y, 'y': x}
 
+                if self.map_[x, y] == -1:
+                    pygame.draw.rect(self.screen, BLACK, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+                if self.map_[x, y] == 50000:
+                    pygame.draw.rect(self.screen, RED, gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['LEFT'])
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['UP'])
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['RIGHT'])
+                self.draw_arrow(*gui_position(current, self.WIDTH_, self.HEIGHT_, self.size_), DIRECTION['DOWN'])
 
         for x in range(self.size_):
             pygame.draw.line(self.screen, RED, [x * self.WIDTH_ / self.size_, 0], [x * self.WIDTH_ / self.size_, self.HEIGHT_], 1)
             pygame.draw.line(self.screen, RED, [0, x * self.WIDTH_ / self.size_], [self.WIDTH_, x * self.WIDTH_ / self.size_], 1)
 
+        # Draw destination
         pygame.draw.rect(self.screen, YELLOW, gui_position(self.destination_position_, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+
         for car_position in self.cars_positions:
             if (car_position == self.destination_position_):
                 pygame.draw.rect(self.screen, (230, 230, 0), gui_position(self.destination_position_, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
@@ -129,14 +180,6 @@ class Renderer:
     def set_destination_position(self, new_destination_position):
         self.destination_position_ = new_destination_position
 
-
-    def update_map(self, town_map):
-        for y in range(self.size_):
-            for x in range(self.size_):
-                if town_map[y, x] == 1:
-                    self.car_position_ = [x, y]
-                elif town_map[y, x] == 2:
-                    self.destination_position_ = [x, y]
 
     def policy(self):
         pass

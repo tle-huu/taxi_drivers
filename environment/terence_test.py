@@ -10,16 +10,23 @@ from taxi_env import TaxiEnv
 from IPython.display import clear_output
 
 
-SIZE = 8
+SIZE = 10
 env = TaxiEnv(SIZE, 2)
 
 action_space_size = env.action_space.n
 state_space_size = env.state_space_size
 
 q_table = np.zeros([state_space_size, action_space_size])
+# print(state_space_size)
+# q_table = np.random.random((state_space_size, action_space_size)) * 1000
 
-NUM_EPISODES = 10000
-MAX_STEPS_PER_EPISODE = 200
+
+# for i in range(state_space_size):
+#     for j in range(action_space_size):
+#         q_table[i][j] = np.random.random() * 1000
+
+NUM_EPISODES = 2
+MAX_STEPS_PER_EPISODE = 50
 
 
 ## Alpha
@@ -31,8 +38,8 @@ DISCOUNT_RATE = 0.95
 ## Epsilon
 exploration_rate = 1
 max_exploration_rate = 1
-min_exploration_rate = 0.05
-exploration_decay_rate = 0.0001
+min_exploration_rate = 0.1
+exploration_decay_rate = 0.00001
 
 
 rewards_all_episodes = []
@@ -45,6 +52,8 @@ DOWN = 2
 LEFT = 3
 
 KEY_TO_ACTION = {"a":  LEFT, "w": UP, "d": RIGHT, "s": DOWN}
+
+success = 0
 
 for episode in range(NUM_EPISODES):
 
@@ -74,6 +83,8 @@ for episode in range(NUM_EPISODES):
         reward_current_episode += reward
 
         if done:
+            success += 1
+            # print("[%d] score: [%d]" % (episode, reward_current_episode))
             break
 
     if exploration_rate >= min_exploration_rate:
@@ -82,7 +93,8 @@ for episode in range(NUM_EPISODES):
     rewards_all_episodes.append(reward_current_episode)
 
 print("Traning done")
-print(q_table)
+print("success rate: %03f" % (success / NUM_EPISODES) )
+# print(q_table)
 
 print(np.mean(rewards_all_episodes), np.min(rewards_all_episodes), np.max(rewards_all_episodes))
 
@@ -98,15 +110,16 @@ for i in range(lol):
     current_reward = 0
     done = False
     i = 0
-    while not done and i < 100:
-        # env.render()
+    while not done and i < 50:
+        env.render()
         action = np.argmax(q_table[state, :])
+        # print(env.decode_action(action))
         state, reward, done, info = env.step(action)
         current_reward += reward
-        # time.sleep(0.300)
+        time.sleep(0.100)
         i+=1
-    # env.render()
-    # env.render()
+    env.render()
+    env.render()
     if done:
         print(" ############## GOAL ################3 ")
         wins += 1

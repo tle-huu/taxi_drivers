@@ -33,8 +33,8 @@ class TaxiEnv:
         self.action_space = ActionSpace(5 ** self.number_of_cars)
         self.state_space_size = self.size ** (2 * (number_of_cars + 1))
 
-        self.car_position_ = {'x': 0, 'y': 0}
-        self.destination_position_ = {'x': int(map_size / 2), 'y': int(map_size / 2)}
+        self.car_position_ = {'x': -1, 'y': -1}
+        self.destination_position_ = {'x': -100, 'y': -100}
 
         self.parse()
 
@@ -48,7 +48,7 @@ class TaxiEnv:
 
 
     def parse(self):
-        self.map, self.car_position_, self.destination_position_ = tools.parser("map_2.txt")
+        self.map, _, _ = environment.tools.parser("map_2.txt")
 
     def info(self):
         pass
@@ -64,9 +64,6 @@ class TaxiEnv:
         # self.map[self.car_position_['y'], self.car_position_['x']] = 1
         self.parse()
 
-        # self.destination_position_['x'] = int(random.randint(0, self.size - 1))
-        # self.destination_position_['y'] = int(random.randint(0, self.size - 1))
-
         for i in range(self.number_of_cars):
             car_position = self.cars_positions[i]
 
@@ -77,9 +74,12 @@ class TaxiEnv:
                 car_position['x'] = int(random.randint(0, self.size - 1))
                 car_position['y'] = int(random.randint(0, self.size - 1))
 
-        # while self.position_value(self.destination_position_) == -1:
-        #     self.destination_position_['x'] = int(random.randint(0, self.size - 1))
-        #     self.destination_position_['y'] = int(random.randint(0, self.size - 1))
+
+        self.destination_position_['x'] = int(random.randint(0, self.size - 1))
+        self.destination_position_['y'] = int(random.randint(0, self.size - 1))
+        while self.position_value(self.destination_position_) == -1:
+            self.destination_position_['x'] = int(random.randint(0, self.size - 1))
+            self.destination_position_['y'] = int(random.randint(0, self.size - 1))
 
         return self.encode_space(self.cars_positions, self.destination_position_)
 
