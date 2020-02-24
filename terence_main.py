@@ -1,11 +1,10 @@
-import os
-# os.chdir("..")
 import numpy as np
 import agent.Agent as Agents
 import json
 from environment.taxi_env import TaxiEnv
 from IPython.display import clear_output
 import torch
+from tqdm import tqdm
 import time
 
 env = TaxiEnv(8, 1)
@@ -28,7 +27,7 @@ if __name__ == '__main__':
             action = env.action_space.sample()
             observation_, reward, done, info = env.step(action)
             agent.store_transition(env.decode_space(observation),
-                                   action,
+                                   env.decode_action(action),
                                    reward,
                                    env.decode_space(observation_),
                                    done)
@@ -36,8 +35,8 @@ if __name__ == '__main__':
     epsHistory = []
     scores = []
     success = 0
-    NUMGAMES = 100
-    for i in range(NUMGAMES):
+    NUMGAMES = 50
+    for i in tqdm(range(NUMGAMES), desc="Train"):
         epsHistory.append(agent.epsilon)
         done = False
         observation = env.reset()
@@ -45,10 +44,10 @@ if __name__ == '__main__':
         score = 0
 
         episod_reward = 0
-        while not done and iterations < 200:
+        while not done and iterations < 100:
             iterations += 1
             action = agent.choose_action(env.decode_space(observation))
-            observation_, reward, done, info = env.step(action)
+            observation_, reward, done, info = env.step(env.encode_action(action))
             score += reward
             agent.store_transition(env.decode_space(observation),
                                    action,
@@ -73,20 +72,20 @@ if __name__ == '__main__':
     success = 0
     iterations = []
     tests = 1000
-    for i in range(tests):
+    for i in tqdm(range(tests), desc="Test"):
         state = env.decode_space(env.reset())
-        # env.render()
+        env.render()
         done = False
         it = 0
         with torch.no_grad():
-            while not done and it < 100:
+            while not done and it < 30:
                 it += 1
                 state = torch.tensor([state],dtype=torch.float).to(agent.q_eval.device)
                 actions = agent.q_eval.forward(state)
                 action = torch.argmax(actions).item()
                 observation, reward, done, info = env.step(action)
-                # time.sleep(0.3)
-                # env.render()
+                time.sleep(0.1)
+                env.render()
                 state = env.decode_space(observation)
             if done and reward > 0:
                 success += 1

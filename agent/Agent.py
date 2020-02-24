@@ -63,7 +63,7 @@ class DQNAgent(Agent):
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation],dtype=torch.float).to(self.q_eval.device)
             actions = self.q_eval.forward(state)
-            action = torch.argmax(actions, dim=2)
+            action = torch.argmax(actions, dim=2).squeeze()
         else:
             action = np.array([np.random.choice(self.action_space) for i in range(self.number_of_cars)])
 
@@ -78,14 +78,19 @@ class DQNAgent(Agent):
         self.replace_target_network()
 
         states, actions, rewards, states_, dones = self.sample_memory()
-        indices = np.arange(self.batch_size)
-        print(actions.size())
-        print(self.q_eval.forward(states).size())
-        q_pred = self.q_eval.forward(states)[indices, actions.long()]
-        q_next = self.q_next.forward(states_).max(dim=1)[0]
+        #indices = np.arange(self.batch_size)
+        #q_pred = torch.tensor([])
+        #out = self.q_eval.forward(states)
+        actions = actions.unsqueeze(-1).long()
+        #for indice in indices:
+        #    q_pred = torch.cat((q_pred, torch.gather(out[indice],1,actions[indice])))
+        #q_pred = self.q_eval.forward(states)[indices, actions.long()]
+        q_pred = torch.gather(self.q_eval.forward(states),2,actions).squeeze()
+        q_next = self.q_next.forward(states_).max(dim=2)[0]
         q_next[dones] = 0.0
-
-        q_target = rewards + self.gamma*q_next
+        
+        
+        q_target = rewards.unsqueeze(-1) + self.gamma*q_next
 
         loss = self.q_eval.loss(q_target, q_pred).to(self.q_eval.device)
         loss.backward()

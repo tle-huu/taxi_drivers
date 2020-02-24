@@ -140,6 +140,10 @@ class TaxiEnv:
         map_out = np.zeros((self.size, self.size, 3))
 
         # map_out = self.map.copy()
+        for i in range(map_out.shape[0]):
+            for j in range(map_out.shape[1]):
+                if self.map[i, j] == 0:
+                    map_out[i, j] = np.array([65, 70,0])
 
         map_out[destination_y][destination_x] = np.array([100, 100, 66])
 
@@ -153,10 +157,13 @@ class TaxiEnv:
 
             if self.map[y][x] == -1:
                 map_out[y][x] = np.array([0, 0, 0])
-            elif self.map[y][x] == 0:
-                map_out[y][x] = np.array([65, 74, 0])
-            elif self.map[y][x] > 0:
-                map_out[y][x] = np.array([0, 0, 255])
+            else:
+                map_out[y][x] = np.array([0, 0, 50 + i * 7])
+
+#            elif self.map[y][x] == 0:
+#                map_out[y][x] = np.array([65, 74, 0])
+#            elif self.map[y][x] > 0:
+#                map_out[y][x] = np.array([0, 0, 255])
 
             # map_out[y][x] = np.array([])
             # map_out[y][x] += 1

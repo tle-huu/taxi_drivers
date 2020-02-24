@@ -8,5 +8,5 @@
 "batch_size" : 32,
 "replace" : 100,
 "eps_dec" : 0.0001,
-"number_of_cars": 3
+"number_of_cars": 1
 }
