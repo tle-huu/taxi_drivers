@@ -1,9 +1,9 @@
 import environment.tools
-import pygame
+#import pygame
 import numpy as np
 import random
 import time
-from environment.renderer import Renderer
+#from environment.renderer import Renderer
 
 ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
 
@@ -38,9 +38,9 @@ class TaxiEnv:
 
         self.parse()
 
-        self.renderer = Renderer(map_size, self.map, self.number_of_cars)
-        self.renderer.set_cars_position(self.cars_positions)
-        self.renderer.set_destination_position(self.destination_position_)
+        #self.renderer = Renderer(map_size, self.map, self.number_of_cars)
+        #self.renderer.set_cars_position(self.cars_positions)
+        #self.renderer.set_destination_position(self.destination_position_)
 
         self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"], ACTIONS['IDLE']]
 

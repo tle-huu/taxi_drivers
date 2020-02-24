@@ -32,7 +32,7 @@ class CarLeader(nn.Module):
         self.fc1 = nn.Sequential(nn.Linear(features, 32), nn.ELU(True))
         self.fc2 = nn.Linear(32, 5)
         self.loss = nn.MSELoss()
-        self.device = torch.device("cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optimizer = optim.RMSprop(self.parameters(), lr = 0.01)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
                                                      mode='min',
@@ -44,6 +44,7 @@ class CarLeader(nn.Module):
                                                      cooldown=10,
                                                      min_lr=0,
                                                      eps=1e-08)
+        self.to(self.device)
     def forward(self, x):
         """
         X is the grid dimension should be (n,1, gridshape[0], gridshape[1]) with n being

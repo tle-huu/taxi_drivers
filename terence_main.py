@@ -5,6 +5,7 @@ import agent.Agent as Agents
 import json
 from environment.taxi_env import TaxiEnv
 from IPython.display import clear_output
+from tqdm import tqdm
 import torch
 import time
 
@@ -37,7 +38,7 @@ if __name__ == '__main__':
     scores = []
     success = 0
     NUMGAMES = 100
-    for i in range(NUMGAMES):
+    for i in tqdm(range(NUMGAMES), desc = 'games for training'):
         epsHistory.append(agent.epsilon)
         done = False
         observation = env.reset()
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     success = 0
     iterations = []
     tests = 1000
-    for i in range(tests):
+    for i in tqdm(range(tests), desc='tests'):
         state = env.decode_space(env.reset())
         # env.render()
         done = False
