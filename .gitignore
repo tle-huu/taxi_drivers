@@ -1,3 +1,6 @@
 nets
 agent/__pycache__/
 environment/__pycache__/
+.DS_Store
+environment/.DS_Store
+environment/.idea
