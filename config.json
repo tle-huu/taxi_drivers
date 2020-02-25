@@ -10,7 +10,7 @@
           "eps_dec" : 0.0001,
           "number_of_cars": 2
           },
-"render_for_eval" : true,
+"render_for_eval" : false,
 "path_to_save" : "nets/weights",
 "games_for_training" : 30,
 "depth_for_traintries" : 30,

@@ -18,6 +18,10 @@ env = TaxiEnv(config["agent"]['input_dims'][-1],
               config["agent"]['number_of_cars'],
               config["render_for_eval"])
 
+if torch.cuda.is_available():
+    torch.cuda.init()
+    print("Cuda initialised we train using GPU power")
+
 
 if __name__ == '__main__':
 
