@@ -8,7 +8,7 @@ from tqdm import tqdm
 import torch
 
 
-with open('agent/config.json') as json_file:
+with open('config.json') as json_file:
     config = json.load(json_file)
 
 if config["render_for_eval"]:

@@ -10,7 +10,7 @@ from tqdm import tqdm
 
 
 
-with open('agent/config.json') as json_file:
+with open('config.json') as json_file:
     config = json.load(json_file)
 
 
