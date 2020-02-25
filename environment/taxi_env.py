@@ -4,7 +4,6 @@ import numpy as np
 import random
 import time
 import torch
-#from environment.renderer import Renderer
 
 ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
 
@@ -22,7 +21,7 @@ class TaxiEnv:
 
     MUR = -1
 
-    def __init__(self, map_size, number_of_cars):
+    def __init__(self, map_size, number_of_cars, render=False):
 
         self.size = map_size
         self.number_of_cars = number_of_cars
@@ -38,10 +37,11 @@ class TaxiEnv:
         self.destination_position_ = {'x': int(map_size / 2), 'y': int(map_size / 2)}
 
         self.parse()
-
-        #self.renderer = Renderer(map_size, self.map, self.number_of_cars)
-        #self.renderer.set_cars_position(self.cars_positions)
-        #self.renderer.set_destination_position(self.destination_position_)
+        if render :
+            from environment.renderer import Renderer
+            self.renderer = Renderer(map_size, self.map, self.number_of_cars)
+            self.renderer.set_cars_position(self.cars_positions)
+            self.renderer.set_destination_position(self.destination_position_)
 
         self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"], ACTIONS['IDLE']]
 
@@ -68,10 +68,12 @@ class TaxiEnv:
         # self.destination_position_['x'] = int(random.randint(0, self.size - 1))
         # self.destination_position_['y'] = int(random.randint(0, self.size - 1))
 
+        pos = [[1, 2], [1, 6]]
+
         for i in range(self.number_of_cars):
             car_position = self.cars_positions[i]
 
-            car_position['x'] = int(random.randint(0, self.size - 1))
+            car_position['x'] =  int(random.randint(0, self.size - 1))
             car_position['y'] = int(random.randint(0, self.size - 1))
 
             while self.position_value(car_position) == -1:
@@ -223,7 +225,7 @@ class TaxiEnv:
                 mur += 1
 
             if car_position == self.destination_position_:
-                reward += 0
+                reward += 1
                 done += 1
             # elif current == self.destination_position_:
                 # reward -= 5000
@@ -233,12 +235,12 @@ class TaxiEnv:
                 reward -= 5
                 # done = 1
             else:
-                reward -= 1
+                reward -= self.number_of_cars
 
         done = (done == self.number_of_cars)
 
-        if done:
-          reward = 10
+        # if done:
+          # reward = 1000
 
         return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 

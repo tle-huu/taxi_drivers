@@ -59,15 +59,15 @@ class DQNAgent(Agent):
     def __init__(self, *args, **kwargs):
         super(DQNAgent, self).__init__(*args, **kwargs)
 
-        self.q_eval = CarLeader(self.input_dims, self.number_of_cars)
-        self.q_next = CarLeader(self.input_dims, self.number_of_cars)
+        self.q_eval = CarLeader(self.input_dims, self.number_of_cars, self.lr)
+        self.q_next = CarLeader(self.input_dims, self.number_of_cars, self.lr)
 
     def choose_action(self, observation):
       
         if np.random.random() > self.epsilon:
             state = torch.tensor([observation],dtype=torch.float).to(self.q_eval.device)
             actions = self.q_eval.forward(state)
-            action = torch.argmax(actions, dim = 2).squeeze(0)
+            action = torch.argmax(actions, dim = 2).squeeze(0).cpu()
         else:
             action = torch.LongTensor([np.random.choice(self.action_space) for _ in range(self.number_of_cars)])
 
@@ -106,8 +106,8 @@ class DQNAgent(Agent):
         q_target = q_target.squeeze()
         q_pred = q_pred.squeeze()
 
-        q_target = q_target.sum(dim = 1)
-        q_pred = q_pred.sum(dim = 1)
+        # q_target = q_target.sum(dim = 1)
+        # q_pred = q_pred.sum(dim = 1)
 
         loss = self.q_eval.loss(q_target, q_pred).to(device)
         loss.backward()
@@ -116,3 +116,5 @@ class DQNAgent(Agent):
         self.q_eval.scheduler.step(loss)
 
         self.decrement_epsilon()
+
+        return float(loss)

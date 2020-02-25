@@ -8,7 +8,7 @@ def dimensions_after_conv(grid_shape, channels_number):
 
 class CarLeader(nn.Module):
 
-    def __init__(self, grid_shape, number_of_cars):
+    def __init__(self, grid_shape, number_of_cars, lr=0.05):
 
         ## private variables
         self.number_of_cars = number_of_cars
@@ -35,13 +35,9 @@ class CarLeader(nn.Module):
         self.flatten = torch.nn.Flatten()
 
         features = int(dimensions_after_conv(grid_shape, 64))
-        # self.fc1 = nn.Sequential(nn.Linear(features, 32), nn.ELU(True))
 
-        # One perceptron per car
-        # self.fc_cars = [ nn.Linear(32, 5)  for _ in range(self.number_of_cars)]
-        self.fc_cars = [ nn.Sequential(nn.Linear(features, 32), nn.ELU(True), nn.Linear(32, 5)) for _ in range(self.number_of_cars)]
+        self.fc_cars = [ nn.Sequential(nn.Linear(features, 32), nn.ELU(True), nn.Linear(32, 5)).to(self.device) for _ in range(self.number_of_cars)]
 
-        # self.fc2 = nn.Linear(32, 5)
 
 
         # Registering new layers to parameters
@@ -59,11 +55,11 @@ class CarLeader(nn.Module):
           self.register_parameter(bias_2_name, torch.nn.Parameter(bias_2))
 
         self.loss = nn.MSELoss()
-        self.optimizer = optim.RMSprop(self.parameters(), lr = 0.01)
+        self.optimizer = optim.RMSprop(self.parameters(), lr = lr)
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer,
                                                      mode='min',
                                                      factor=0.5,
-                                                     patience=1000,
+                                                     patience=2000,
                                                      verbose=True,
                                                      threshold=0.0001,
                                                      threshold_mode='rel',
@@ -79,17 +75,12 @@ class CarLeader(nn.Module):
         output is a vector of size (n,4) containing q values for up,down,left,right for 
         each grid of the batch
         """
-
-        print(x)
         x = self.convs1(x)
         x = self.convs2(x)
         x = self.convs3(x)
         x = self.flatten(x)
 
-        x= torch.Tensor(x)
-
         out = self.fc_cars[0](x).unsqueeze(1)
-        # out = self.fc2(x).unsqueeze(1)
         for index in range(1, self.number_of_cars):
 
           out_local_car = self.fc_cars[index](x).unsqueeze(1)
