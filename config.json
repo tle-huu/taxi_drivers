@@ -1,0 +1,22 @@
+{"agent":{"gamma" :0.9,
+          "epsilon" : 0.9,
+          "lr" : 0.01,
+          "input_dims": [3, 8, 8],
+          "n_actions" : 5,
+          "mem_size" : 128,
+          "eps_min" : 0.1,
+          "batch_size" : 64,
+          "replace" : 100,
+          "eps_dec" : 0.0001,
+          "number_of_cars": 2
+          },
+"render_for_eval" : false,
+"path_to_save" : "nets/weights",
+"games_for_training" : 30,
+"depth_for_traintries" : 30,
+"games_for_evaluation" : 100,
+"depth_for_testtries" : 50,
+"path_weights_to_test" : "nets/weights_with_2cars_for_30traingames",
+"games_for_test" : 100,
+"depth_for_test" : 30
+}

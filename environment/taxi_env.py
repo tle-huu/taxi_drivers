@@ -1,9 +1,9 @@
 import environment.tools
-import pygame
+#import pygame
 import numpy as np
 import random
 import time
-from environment.renderer import Renderer
+import torch
 
 ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
 
@@ -21,7 +21,7 @@ class TaxiEnv:
 
     MUR = -1
 
-    def __init__(self, map_size, number_of_cars):
+    def __init__(self, map_size, number_of_cars, render=False):
 
         self.size = map_size
         self.number_of_cars = number_of_cars
@@ -37,10 +37,11 @@ class TaxiEnv:
         self.destination_position_ = {'x': int(map_size / 2), 'y': int(map_size / 2)}
 
         self.parse()
-
-        self.renderer = Renderer(map_size, self.map, self.number_of_cars)
-        self.renderer.set_cars_position(self.cars_positions)
-        self.renderer.set_destination_position(self.destination_position_)
+        if render :
+            from environment.renderer import Renderer
+            self.renderer = Renderer(map_size, self.map, self.number_of_cars)
+            self.renderer.set_cars_position(self.cars_positions)
+            self.renderer.set_destination_position(self.destination_position_)
 
         self.ACTIONS = [ACTIONS["UP"], ACTIONS["RIGHT"], ACTIONS["DOWN"], ACTIONS["LEFT"], ACTIONS['IDLE']]
 
@@ -67,10 +68,12 @@ class TaxiEnv:
         # self.destination_position_['x'] = int(random.randint(0, self.size - 1))
         # self.destination_position_['y'] = int(random.randint(0, self.size - 1))
 
+        pos = [[1, 2], [1, 6]]
+
         for i in range(self.number_of_cars):
             car_position = self.cars_positions[i]
 
-            car_position['x'] = int(random.randint(0, self.size - 1))
+            car_position['x'] =  int(random.randint(0, self.size - 1))
             car_position['y'] = int(random.randint(0, self.size - 1))
 
             while self.position_value(car_position) == -1:
@@ -139,9 +142,16 @@ class TaxiEnv:
 
         map_out = np.zeros((self.size, self.size, 3))
 
-        # map_out = self.map.copy()
+        for i in range(map_out.shape[0]):
+          for j in range(map_out.shape[1]):
+            if self.map[i, j] == 0:
+              map_out[i, j] = np.array([0, 100, 0])
 
-        map_out[destination_y][destination_x] = np.array([100, 100, 66])
+        colors = [ np.array([0, 0, 200]), np.array([200, 0, 0]) ]
+
+        # map_out[destination_y][destination_x] = np.array([100, 100, 66])
+
+        stride = int(254 / self.number_of_cars)
 
         for i in range(self.number_of_cars):
 
@@ -151,15 +161,13 @@ class TaxiEnv:
             y = encoded_state % self.size
             encoded_state = encoded_state // self.size
 
-            if self.map[y][x] == -1:
-                map_out[y][x] = np.array([0, 0, 0])
-            elif self.map[y][x] == 0:
-                map_out[y][x] = np.array([65, 74, 0])
-            elif self.map[y][x] > 0:
-                map_out[y][x] = np.array([0, 0, 255])
+            # map_out[y][x] = np.array([0, 0, (i + 1) * stride])
+            map_out[y][x] += colors[i]
 
             # map_out[y][x] = np.array([])
             # map_out[y][x] += 1
+            
+        map_out[destination_y][destination_x] = np.array([100, 100, 66])
 
         return map_out.T
 
@@ -217,19 +225,22 @@ class TaxiEnv:
                 mur += 1
 
             if car_position == self.destination_position_:
-                reward += 100
+                reward += 1
                 done += 1
             # elif current == self.destination_position_:
-            #     reward -= 500
+                # reward -= 5000
             # elif car_position == current:
             #     reward -= 50
             if mur > 0:
-                reward -= 10
+                reward -= 5
                 # done = 1
             else:
-                reward -= 1
+                reward -= self.number_of_cars
 
         done = (done == self.number_of_cars)
+
+        # if done:
+          # reward = 1000
 
         return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 
