@@ -1,16 +1,17 @@
 import os
-# os.chdir("..")
+import sys
 import numpy as np
 import agent.Agent as Agents
 import json
 from environment.taxi_env import TaxiEnv
 from IPython.display import clear_output
+
+from matplotlib import pyplot as plt
 from tqdm import tqdm
 import torch
 import time
 
 env = TaxiEnv(8, 1)
-
 
 
 with open('agent/config.json') as json_file:
@@ -35,22 +36,20 @@ if __name__ == '__main__':
                                    done)
             observation = observation_
     epsHistory = []
-    scores = []
+    total_rewards = []
     success = 0
-    NUMGAMES = 100
+    NUMGAMES = 20
     for i in tqdm(range(NUMGAMES), desc = 'games for training'):
         epsHistory.append(agent.epsilon)
         done = False
         observation = env.reset()
         iterations = 0
-        score = 0
 
-        episod_reward = 0
-        while not done and iterations < 200:
+        episode_reward = 0
+        while not done and iterations < 100:
             iterations += 1
             action = agent.choose_action(env.decode_space(observation))
             observation_, reward, done, info = env.step(action)
-            score += reward
             agent.store_transition(env.decode_space(observation),
                                    action,
                                    reward,
@@ -59,16 +58,22 @@ if __name__ == '__main__':
             observation = observation_
             agent.learn()
 
-            episod_reward += reward
+            episode_reward += reward
 
-        print("[%d] reward [%d] " % (i, episod_reward))
+        print("[%d] reward [%d] " % (i, episode_reward))
         if done and reward > 0:
             success += 1
 
-        scores.append(score)
-        # print(score)
+        total_rewards.append(episode_reward)
+
+        plt.plot(total_rewards)
+        plt.show()
+    
 
     print("Training success rate %03f" % (success / NUMGAMES))
+
+    print("Saving model to disk...")
+    torch.save(agent.q_eval.state_dict(), "one_car_model.dat")
 
     print("Evaluation ...")
     success = 0
