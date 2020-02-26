@@ -16,6 +16,7 @@ if config["render_for_eval"]:
 
 env = TaxiEnv(config["agent"]['input_dims'][-1],
               config["agent"]['number_of_cars'],
+              config["map_path"],
               config["render_for_eval"])
 
 if torch.cuda.is_available():

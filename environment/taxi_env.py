@@ -4,9 +4,11 @@ import numpy as np
 import random
 import time
 import torch
+import sys
 
 ACTIONS = {"UP": 0, "RIGHT": 1, "DOWN": 2, "LEFT": 3, "IDLE": 4}
 
+PIXEL_MAX_VALUE = 255
 
 class ActionSpace:
 
@@ -19,36 +21,53 @@ class ActionSpace:
 
 class TaxiEnv:
 
-    def __init__(self, map_size, number_of_cars, render = False):
+    def __init__(self, map_size, number_of_cars, map_file_path, render = False):
 
+        self.map_file_path = map_file_path
         self.size = map_size
         self.number_of_cars = number_of_cars
 
-        self.cars_positions = [{'x': 0, 'y': 0} for _ in range(number_of_cars)]
+
+        ## This is hardcoded to work with a number of cars <= 5
+        STRIDE = 40
+
+        if self.number_of_cars > 5:
+            print("Error: Too many cars, can't discriminate")
+            ## TODO: throw
+            sys.exit(1)
+
+        self.COLORS_ = []        
+        for i in range(1, int(self.number_of_cars / 2) + 2):
+            self.COLORS_.append( np.array([255 - STRIDE * i, 0, 0]) )
+            self.COLORS_.append( np.array([0, 0, 255 - STRIDE * i]) )
 
         self.map = np.zeros([map_size, map_size])
 
         self.action_space = ActionSpace(5 ** self.number_of_cars)
         self.state_space_size = self.size ** (2 * (number_of_cars + 1))
 
-        self.destination_position_ = {'x': int(map_size / 2), 'y': int(map_size / 2)}
 
         self.parse()
-
-        if render:
-            # Lazy import
-            from environment.renderer import Renderer
-            self.renderer = Renderer(map_size, self.map, self.number_of_cars)
-            self.renderer.set_cars_position(self.cars_positions)
-            self.renderer.set_destination_position(self.destination_position_)
 
         ## Meant to be used by an external to change reward dynamically
         self.reward = {}
 
+        ## Initializing to negative number every coordinate to catch early bug
+        self.destination_position_ = {'x': -1337, 'y': -1337}
+        self.cars_positions = [{'x': -1337, 'y': -1337} for _ in range(number_of_cars)]
+
+        self.map_out = np.zeros((self.size, self.size, 3))
+
+        if render:
+            # Lazy import
+            from environment.renderer import Renderer
+            self.renderer = Renderer(map_size, self.map_out, self.number_of_cars, self.COLORS_)
+            self.renderer.set_cars_position(self.cars_positions)
+            self.renderer.set_destination_position(self.destination_position_)
 
     ## TODO: Make the parsing Goal agnostic
     def parse(self):
-        self.map, self.car_position_, self.destination_position_ = environment.tools.parser("environment/map_2.txt")
+        self.map, self.car_position_, self.destination_position_ = environment.tools.parser(self.map_file_path)
 
     def info(self):
         pass
@@ -71,6 +90,7 @@ class TaxiEnv:
 
     def render(self):
 
+        self.renderer.set_map(self.map_out)
         self.renderer.render()
 
 
@@ -113,7 +133,7 @@ class TaxiEnv:
 
         ## Episode ends when all the cars have reached the goal
         done = (number_of_cars_in_goal_square == self.number_of_cars)
-
+        # self.decode_space(self.encode_space(self.cars_positions, self.destination_position_))
         return self.encode_space(self.cars_positions, self.destination_position_), reward, done, None
 
 
@@ -151,36 +171,32 @@ class TaxiEnv:
         destination_y = encoded_state % self.size
         encoded_state = encoded_state // self.size
 
-        map_out = np.zeros((self.size, self.size, 3))
+        self.map_out = np.zeros((self.size, self.size, 3))
 
-        for i in range(map_out.shape[0]):
-          for j in range(map_out.shape[1]):
-            if self.map[i, j] == 0:
-              map_out[i, j] = np.array([0, 100, 0])
-
-        colors = [ np.array([0, 0, 200]), np.array([200, 0, 0]) ]
-
-        # map_out[destination_y][destination_x] = np.array([100, 100, 66])
-
-        stride = int(254 / self.number_of_cars)
+        for i in range(self.map_out.shape[0]):
+            for j in range(self.map_out.shape[1]):
+                # roads are green
+                if self.map[i, j] == 0:
+                    self.map_out[i, j] = np.array([0, 100, 0])
 
         for i in range(self.number_of_cars):
 
+            ## Decoding coordinates
             x = encoded_state % self.size
             encoded_state = encoded_state // self.size
 
             y = encoded_state % self.size
             encoded_state = encoded_state // self.size
 
-            # map_out[y][x] = np.array([0, 0, (i + 1) * stride])
-            map_out[y][x] += colors[i]
+            if self.map_out[y, x][1] == 255:
+                self.map_out[y, x] = np.array([0, 0, 0])
 
-            # map_out[y][x] = np.array([])
-            # map_out[y][x] += 1
-            
-        map_out[destination_y][destination_x] = np.array([100, 100, 66])
+            ## Coloring car's square with the car's color
+            self.map_out[y][x] += self.COLORS_[i]
 
-        return map_out.T
+        self.map_out[destination_y][destination_x] = np.array([100, 100, 66])
+
+        return self.map_out.T
 
     def encode_action(self, actions_array):
 

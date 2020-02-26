@@ -10,7 +10,7 @@
           "eps_dec" : 0.0001,
           "number_of_cars": 2
           },
-"render_for_eval" : false,
+"render_for_eval" : true,
 "path_to_save" : "nets/weights",
 "games_for_training" : 30,
 "depth_for_traintries" : 30,
@@ -18,5 +18,6 @@
 "depth_for_testtries" : 50,
 "path_weights_to_test" : "nets/weights_with_2cars_for_30traingames",
 "games_for_test" : 100,
-"depth_for_test" : 30
+"depth_for_test" : 30,
+"map_path": "environment/map_2.txt"
 }
