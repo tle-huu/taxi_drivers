@@ -37,9 +37,21 @@ class TaxiEnv:
             sys.exit(1)
 
         self.COLORS_ = []        
-        for i in range(1, int(self.number_of_cars / 2) + 2):
-            self.COLORS_.append( np.array([255 - STRIDE * i, 0, 0]) )
-            self.COLORS_.append( np.array([0, 0, 255 - STRIDE * i]) )
+        # for i in range(1, int(self.number_of_cars / 2) + 2):
+        #     self.COLORS_.append( np.array([255 - STRIDE * i, 0, 0]) )
+        #     self.COLORS_.append( np.array([0, 0, 255 - STRIDE * i]) )
+
+        # self.COLORS_.append( np.array([255, 0, 0]) )
+        # self.COLORS_.append( np.array([0, 0, 255]) )
+        # self.COLORS_.append( np.array([100, 0, 0]) )
+        # self.COLORS_.append( np.array([0, 0, 100]) )
+        # self.COLORS_.append( np.array([150, 150, 150]) )
+
+        ## 3 cars colors test
+        self.COLORS_.append( np.array([255, 0, 0]) )
+        self.COLORS_.append( np.array([0, 0, 255]) )
+        self.COLORS_.append( np.array([0, 255, 0]) )
+
 
         self.map = np.zeros([map_size, map_size])
 
@@ -121,7 +133,7 @@ class TaxiEnv:
 
             ## Gaining a point for being on the destination square
             if car_position == self.destination_position_:
-                reward += 1
+                reward += 5
                 number_of_cars_in_goal_square += 1
 
             ## A wall is very bad
@@ -177,7 +189,7 @@ class TaxiEnv:
             for j in range(self.map_out.shape[1]):
                 # roads are green
                 if self.map[i, j] == 0:
-                    self.map_out[i, j] = np.array([0, 100, 0])
+                    self.map_out[i, j] = np.array([255, 255, 255])
 
         for i in range(self.number_of_cars):
 
@@ -188,13 +200,13 @@ class TaxiEnv:
             y = encoded_state % self.size
             encoded_state = encoded_state // self.size
 
-            if self.map_out[y, x][1] == 255:
+            if self.map_out[y, x][0] == 255 and self.map_out[y, x][1] == 255 and self.map_out[y, x][2] == 255:
                 self.map_out[y, x] = np.array([0, 0, 0])
 
             ## Coloring car's square with the car's color
             self.map_out[y][x] += self.COLORS_[i]
 
-        self.map_out[destination_y][destination_x] = np.array([100, 100, 66])
+        self.map_out[destination_y][destination_x] = np.array([235, 225, 52])
 
         return self.map_out.T
 
