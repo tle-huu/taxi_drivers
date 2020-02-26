@@ -19,7 +19,7 @@ def gui_position(positions, width, height, size):
 
 class Renderer:
 
-    def __init__(self, size, town_map, number_of_cars):
+    def __init__(self, size, town_map, number_of_cars, colors):
 
 
         self.size_ = size
@@ -28,6 +28,7 @@ class Renderer:
         self.map_ = town_map
         self.number_of_cars = number_of_cars
         self.cars_positions = None
+        self.colors_ = colors
 
         self.destination_position_ = {'x': -1, 'y': -1}
         self.car_position_ = {'x': -1, 'y': -1}
@@ -46,25 +47,24 @@ class Renderer:
         pygame.display.set_caption("My First Game")
         self.screen.fill(GREEN)
 
+        # for i in range(self.number_of_cars):
+        #     car_position = self.cars_positions[i]
+        #     pygame.draw.rect(self.screen, self.colors_[i], gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+
         for x in range(self.size_):
             for y in range(self.size_):
-
-                if self.map_[x, y] == -1:
-                    pygame.draw.rect(self.screen, BLACK, gui_position({'x': y, 'y': x}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-                if self.map_[x, y] == 50000:
-                    pygame.draw.rect(self.screen, RED, gui_position({'x': y, 'y': x}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-
+                pygame.draw.rect(self.screen, self.map_[y, x], gui_position({'x': x, 'y': y}, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
 
         for x in range(self.size_):
             pygame.draw.line(self.screen, RED, [x * self.WIDTH_ / self.size_, 0], [x * self.WIDTH_ / self.size_, self.HEIGHT_], 1)
             pygame.draw.line(self.screen, RED, [0, x * self.WIDTH_ / self.size_], [self.WIDTH_, x * self.WIDTH_ / self.size_], 1)
 
-        pygame.draw.rect(self.screen, YELLOW, gui_position(self.destination_position_, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-        for car_position in self.cars_positions:
-            if (car_position == self.destination_position_):
-                pygame.draw.rect(self.screen, (230, 230, 0), gui_position(self.destination_position_, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
-            else:
-                pygame.draw.rect(self.screen, BLUE, gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+        # pygame.draw.rect(self.screen, YELLOW, gui_position(self.destination_position_, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+        # for car_position in self.cars_positions:
+        #     if (car_position == self.destination_position_):
+        #         pygame.draw.rect(self.screen, (230, 230, 0), gui_position(self.destination_position_, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
+        #     else:
+        #         pygame.draw.rect(self.screen, BLUE, gui_position(car_position, self.WIDTH_, self.HEIGHT_, self.size_) + [self.WIDTH_ / self.size_, self.WIDTH_ / self.size_], 0)
         
 
         # Rerender
@@ -125,6 +125,9 @@ class Renderer:
     ## !! These are changing the referense !!
     def set_cars_position(self, cars_positions):
         self.cars_positions = cars_positions
+
+    def set_map(self, new_map):
+        self.map_ = new_map
 
     def set_destination_position(self, new_destination_position):
         self.destination_position_ = new_destination_position

@@ -22,6 +22,7 @@ if __name__ == '__main__':
     
     env = TaxiEnv(configmodel["input_dims"][-1],
                   configmodel["number_of_cars"],
+                  config['map_path'],
                   render=True)
 
     model.load_state_dict(weights)
@@ -39,14 +40,16 @@ if __name__ == '__main__':
                 it += 1
                 state = torch.tensor([state],dtype=torch.float)
                 actions = model.forward(state)
-                action = torch.argmax(actions).item()
-                observation, reward, done, info = env.step(action)
-                time.sleep(0.3)
+                action = torch.argmax(actions, dim = 2).squeeze(0)
+                observation, reward, done, info = env.step(env.encode_action(action))
+                time.sleep(0.1)
                 env.render()
                 state = env.decode_space(observation)
-            if done and reward > 0:
+            if done:
                 success += 1
             iterations.append(it)
+        env.render()
+
     print("Evaluation success rate %03f" % (success / tests))
 
     print("Average number of step: %d" % np.mean(iterations))
