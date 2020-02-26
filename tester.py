@@ -39,7 +39,7 @@ if __name__ == '__main__':
                 it += 1
                 state = torch.tensor([state],dtype=torch.float)
                 actions = model.forward(state)
-                action = torch.argmax(actions).item()
+                action = torch.argmax(actions, dim = 2).squeeze(0)
                 observation, reward, done, info = env.step(action)
                 time.sleep(0.3)
                 env.render()
