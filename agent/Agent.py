@@ -61,7 +61,25 @@ class DQNAgent(Agent):
 
         self.q_eval = CarLeader(self.input_dims, self.number_of_cars, self.lr)
         self.q_next = CarLeader(self.input_dims, self.number_of_cars, self.lr)
-
+    
+    
+    def save_checkpoint(self, path):
+        params= {"gamma" : self.gamma,
+                 "epsilon" : self.epsilon,
+                 "learn_step_counter" : self.learn_step_counter
+                }
+        weights = {"q_eval" : self.q_eval.state_dict(), 
+                   "q_next" : self.q_next.state_dict()}
+        torch.save({"params": params, "weights" : weights}, path)
+        return
+    
+    def load_checkpoint(self, checkpoint):
+        self.gamma = checkpoint["params"]["gamma"]
+        self.epsilon = checkpoint["params"]["epsilon"]
+        self.learn_step_counter = checkpoint["params"]["learn_step_counter"]
+        self.q_eval.load_state_dict(checkpoint["weights"]["q_eval"])
+        self.q_next.load_state_dict(checkpoint["weights"]["q_next"])
+    
     def choose_action(self, observation):
       
         if np.random.random() > self.epsilon:

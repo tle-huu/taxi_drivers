@@ -27,7 +27,12 @@ if torch.cuda.is_available():
 if __name__ == '__main__':
 
     agent = Agents.DQNAgent(**config["agent"])
-
+    
+    if config["train_from_checkpoint"]:
+        agent.load_checkpoint(torch.load(config["checkpoint_path"], 
+                                 map_location=agent.q_eval.device))
+        print("Initial checkpoint loaded")
+    
     print("Filling the replay memory buffer")
     while agent.memory.mem_cntr < agent.memory.mem_size:
         done = False
@@ -100,10 +105,13 @@ if __name__ == '__main__':
         ax2.set_title("Losses")
         ax3.plot(total_successes)
         ax3.set_title("Successes")
-
         plt.show()
-    
-
+        
+        ##Checkpoint saving
+        if i % config["save_checkpoint_period"] == 0:
+            agent.save_checkpoint(config["checkpoint_path"])
+            print("saving the new checkpoint")
+        
     print("Training success rate %03f" % (success / NUMGAMES))
 
     print("Saving model and config to disk...")
