@@ -31,10 +31,13 @@ class CarLeader(nn.Module):
                                     nn.BatchNorm2d(64),
                                     nn.ReLU(True))
         
+        self.convs4 = nn.Sequential(nn.Conv2d(64, 128, kernel_size = 3, padding = 1),
+                                    nn.BatchNorm2d(128),
+                                    nn.ReLU(True))
         
         self.flatten = torch.nn.Flatten()
 
-        features = int(dimensions_after_conv(grid_shape, 64))
+        features = int(dimensions_after_conv(grid_shape, 128))
 
         self.fc_cars = [ nn.Sequential(nn.Linear(features, 32), nn.ELU(True), nn.Linear(32, 5)).to(self.device) for _ in range(self.number_of_cars)]
 
@@ -78,6 +81,7 @@ class CarLeader(nn.Module):
         x = self.convs1(x)
         x = self.convs2(x)
         x = self.convs3(x)
+        x = self.convs4(x)
         x = self.flatten(x)
 
         out = self.fc_cars[0](x).unsqueeze(1)
