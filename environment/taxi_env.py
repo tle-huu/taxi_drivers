@@ -79,7 +79,7 @@ class TaxiEnv:
 
     ## TODO: Make the parsing Goal agnostic
     def parse(self):
-        self.map, self.car_position_, self.destination_position_ = environment.tools.parser(self.map_file_path)
+        self.map, _, _ = environment.tools.parser(self.map_file_path)
 
     def info(self):
         pass
@@ -92,7 +92,7 @@ class TaxiEnv:
             self.cars_positions[i] = self.generate_random_correct_position_()
 
         ## Uncomment to randomize destination position
-        # self.destination_position_ = self.generate_random_correct_position_()
+        self.destination_position_ = self.generate_random_correct_position_()
 
         return self.encode_space(self.cars_positions, self.destination_position_)
 
