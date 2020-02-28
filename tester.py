@@ -16,7 +16,7 @@ with open('config.json') as json_file:
 
 if __name__ == '__main__':
     weights, configmodel = torch.load(config["path_weights_to_test"], 
-                                 map_location=torch.device("cpu")).values()
+                                          map_location=torch.device("cpu")).values()
     
     model = CarLeader(configmodel["input_dims"][1:], configmodel["number_of_cars"])
     
