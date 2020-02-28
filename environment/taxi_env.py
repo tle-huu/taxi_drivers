@@ -256,7 +256,7 @@ class TaxiEnv:
 
         collision = False
 
-        for i in range(self.cars_positions):
+        for i in range(len(self.cars_positions)):
             if i == car_id:
                 continue
 

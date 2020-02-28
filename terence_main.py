@@ -109,7 +109,7 @@ if __name__ == '__main__':
         
         ##Checkpoint saving
         if i % config["save_checkpoint_period"] == 0:
-            agent.save_checkpoint(config["checkpoint_path"])
+            agent.save_checkpoint(config["checkpoint_path"], config)
             print("saving the new checkpoint")
         
     print("Training success rate %03f" % (success / NUMGAMES))
@@ -135,7 +135,7 @@ if __name__ == '__main__':
         it = 0
         with torch.no_grad():
             current_reward = 0
-            while not done and it < config["depth_for_testtries"]:
+            while not done and it < config["depth_for_evaltries"]:
                 it += 1
                 state = torch.tensor([state],dtype=torch.float).to(agent.q_eval.device)
 
