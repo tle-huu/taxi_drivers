@@ -116,7 +116,6 @@ class TaxiEnv:
 
         for i in range(self.number_of_cars):
 
-
             car_position = self.cars_positions[i]
             action = action_array[i]
 
@@ -124,7 +123,7 @@ class TaxiEnv:
             current = car_position.copy()
             hit_a_wall = False
 
-            self.move_car_(car_position, action)
+            self.move_car_(i, car_position, action)
 
             ## If the car happens to have moved in a wall, putting it back to its road square
             if self.position_value_(car_position) == -1:
@@ -253,7 +252,22 @@ class TaxiEnv:
 
         return position
 
-    def move_car_(self, car_position, action):
+    def move_car_(self, car_id, car_position, action):
+
+        collision = False
+
+        for i in range(self.cars_positions):
+            if i == car_id:
+                continue
+
+            if self.cars_positions[i] == car_position:
+                collision = True
+                break
+
+        ## Jam
+        if collision and np.random.random() < 0.4:
+            return
+
 
         if action == ACTIONS["UP"] and car_position['y'] > 0:
             car_position['y'] -= 1
