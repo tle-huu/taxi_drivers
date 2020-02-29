@@ -46,7 +46,7 @@ the one he thinks is the best with the current state of the environment.
 "games_for_training" : 30,
 "depth_for_traintries" : 30,
 "games_for_evaluation" : 100,
-"depth_for_testtries" : 50,
+"depth_for_evaltries" : 50,
 "path_weights_to_test" : "nets/weights_with_3cars_for_1000traingames",
 "games_for_test" : 100,
 "depth_for_test" : 30,
@@ -76,7 +76,7 @@ a success before it will of course stop before)
 
 After setting the parameters right, a training can be launched running simply terence_main.py
 ```
-python3 terence_main.py
+python3 train.py
 ```
  
  ## Test a model
