@@ -1,3 +1,10 @@
+"""
+A testing module to test and see in action
+a saved model in config["path_weights_to_test"]
+The format of the saved model should be a dict like this :
+    {"weights": q_eval.state_dict(),
+    "params" : config["agent"] used for the training}
+"""
 import torch
 import numpy as np
 from agent.DRL import CarLeader

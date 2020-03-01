@@ -1,3 +1,7 @@
+"""
+This module just creates a queue of transition that we use to 
+create batch and learn
+"""
 import numpy as np
 
 class ReplayBuffer():

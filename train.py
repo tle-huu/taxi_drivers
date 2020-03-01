@@ -1,3 +1,8 @@
+"""
+Train module that will train a model using config.json parameters
+Every k games a checkpoint is saved if the training crashes (or if colab disconnects us)
+The model is then evaluated and saved
+"""
 import numpy as np
 import agent.Agent as Agents
 import json
@@ -107,7 +112,7 @@ if __name__ == '__main__':
         ax3.set_title("Successes")
         plt.show()
         
-        ##Checkpoint saving
+        ##Checkpoint saving every k games
         if i % config["save_checkpoint_period"] == 0:
             agent.save_checkpoint(config["checkpoint_path"], config)
             print("saving the new checkpoint")
