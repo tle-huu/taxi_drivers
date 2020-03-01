@@ -1,3 +1,7 @@
+"""
+This module contains the agent class that orchestrates the learning 
+process from the data manipulation to the gradient descent.
+"""
 import numpy as np
 import torch
 from agent.Memory import ReplayBuffer
@@ -112,12 +116,15 @@ class DQNAgent(Agent):
 
         q_next = forward_next_states.max(dim = 2)[0]
         q_next[dones] = 0.0
-
+        
+        #Computing q_target for the MSEloss
         q_target = rewards.unsqueeze(-1) + self.gamma * q_next
 
         q_target = q_target.squeeze()
         q_pred = q_pred.squeeze()
-
+        
+        #We tried to sum q_values for cars it works the same as
+        #giving them total rewards line by line
         # q_target = q_target.sum(dim = 1)
         # q_pred = q_pred.sum(dim = 1)
 

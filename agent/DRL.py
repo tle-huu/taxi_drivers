@@ -1,3 +1,6 @@
+"""
+This module contains the deep learning network
+"""
 import torch
 import torch.nn as nn
 import torch.optim as optim
