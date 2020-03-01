@@ -73,9 +73,9 @@ class CarLeader(nn.Module):
     
     def forward(self, x):
         """
-        X is the grid dimension should be (n,1, gridshape[0], gridshape[1]) with n being
+        X is the grid dimension should be (n,3, gridshape[0], gridshape[1]) with n being
         the number of grids in the batch
-        output is a vector of size (n,4) containing q values for up,down,left,right for 
+        output is a vector of size (n,number_of_cars,5) containing q values for up,down,left,right for cars of
         each grid of the batch
         """
         x = self.convs1(x)
