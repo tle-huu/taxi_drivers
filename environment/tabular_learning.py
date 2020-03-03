@@ -10,12 +10,17 @@ from taxi_env import TaxiEnv
 from IPython.display import clear_output
 
 
+## Size of the map
 SIZE = 8
+
+## Creating environment with 2 cars
 env = TaxiEnv(SIZE, 2)
 
 action_space_size = env.action_space.n
 state_space_size = env.state_space_size
 
+## Initializing q_table to zeros
+## Initializing the q values randomly also have decent results
 q_table = np.zeros([state_space_size, action_space_size])
 
 NUM_EPISODES = 10000
@@ -36,7 +41,6 @@ exploration_decay_rate = 0.0001
 
 
 rewards_all_episodes = []
-
 
 
 UP = 0
@@ -60,22 +64,25 @@ for episode in range(NUM_EPISODES):
 
         exploration_rate_threshold = random.uniform(0, 1)
 
+        ## Applying epsilon greediness
         if exploration_rate_threshold > exploration_rate:
             action = np.argmax(q_table[state,:])
         else:
             action = env.action_space.sample()
 
+        ## Playing and getting information from environmnent
         new_state, reward, done, info = env.step(action)
-
+ 
+        ## Updating q_table
         q_table[state, action] = (1 - LEARNING_RATE) * q_table[state, action] + LEARNING_RATE * (reward + DISCOUNT_RATE * np.max(q_table[new_state, :]))
 
         state = new_state
-        env.decode_space(state)
         reward_current_episode += reward
 
         if done:
             break
 
+    ## Decaying epislon to favor exploitation over time
     if exploration_rate >= min_exploration_rate:
         exploration_rate -= exploration_decay_rate
 
@@ -86,11 +93,11 @@ print(q_table)
 
 print(np.mean(rewards_all_episodes), np.min(rewards_all_episodes), np.max(rewards_all_episodes))
 
+## Evaluation
 done = False
 state = env.reset()
 
 r = []
-
 wins = 0
 lol = 1000
 for i in range(lol):
@@ -108,7 +115,6 @@ for i in range(lol):
     # env.render()
     # env.render()
     if done:
-        print(" ############## GOAL ################3 ")
         wins += 1
     else:
         print(" FELL ")
