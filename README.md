@@ -3,6 +3,32 @@
 Arthur Lindoulsi <br>
 Terence Le Huu Phuong <br>
 
+<p align="center">
+<img  alt="double dqn" src="3_cars_gif.gif" width="300">
+<br>
+Double DQN
+</p>
+
+<br>
+We investigate the problem of traffic optimization through a reinforcement learning approach.
+The agents are located in a spatial grid world environment and have to reach a destination as fast as possible.
+The challenge is to flexibly control a fixed number of agent while achieving effective collaboration over different grid-world configuration.
+
+The agents have to optimize their own path as well as their overall score, and thus need to take other agents’ path into consideration. We propose an architecture that learns the spatial representations of the agents and their destination, and outputs grid-wise actions.
+
+Each agent is given its own control action from the tile it stands on, in order to maximize the group’s reward. We employ a convolutional network as policy over a pixels feature map. The stacked convolutional layers provide a large receptive field and spur agents to communicate.
+Beside collaboration, agents also share their learning experience by sharing the convolutional layers.
+<br>
+<br>
+<br>
+
+<p align="center">
+<img  alt="temporal difference" src="temporal_difference.png" width="300">
+<br>
+Temporal difference with one car
+</p>
+<br>
+
 ## Configuration
 The config.json file contains all parameters to launch a training or to test a model. Here is the parameter meaning:
 
